@@ -211,6 +211,3 @@ O Hibernate valida a estrutura existente, mas não cria automaticamente as tabel
 
 Fornecer uma solução simples, segura e de fácil manutenção para organizar as atividades semanais e os prazos de um escritório de advocacia.
 
-## Status
-
-Backend em desenvolvimento.
