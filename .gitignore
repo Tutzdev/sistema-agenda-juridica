@@ -1,0 +1,21 @@
+# Build
+target/
+
+# Local database
+data/
+*.mv.db
+*.trace.db
+
+# Runtime logs
+run-logs/
+*.log
+
+# Local configuration and IDE files
+.env
+.idea/
+.vscode/
+*.iml
+
+# Operating system files
+.DS_Store
+Thumbs.db

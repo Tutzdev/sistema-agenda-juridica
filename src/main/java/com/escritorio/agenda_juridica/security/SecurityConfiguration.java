@@ -28,7 +28,7 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.csrfTokenRepository(csrfRepository))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/csrf").permitAll()
+                    .requestMatchers("/", "/index.html", "/assets/**", "/api/auth/login", "/api/auth/csrf").permitAll()
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors

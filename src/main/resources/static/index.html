@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>Agenda Juridica | Painel</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div id="login-view" class="login-shell" hidden>
+    <div class="login-art" aria-hidden="true">
+      <div class="seal">AJ</div>
+      <p class="eyebrow">Escritorio em ordem</p>
+      <h1>Decisoes melhores com a agenda certa.</h1>
+      <p>Centralize prazos, audiencias e compromissos em um unico lugar.</p>
+    </div>
+    <form id="login-form" class="login-form">
+      <span class="eyebrow">Agenda Juridica</span>
+      <h2>Acesse seu painel</h2>
+      <p class="muted">Entre com suas credenciais para continuar.</p>
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" autocomplete="username" required placeholder="voce@escritorio.com">
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="Sua senha">
+      <button class="primary-button" type="submit">Entrar no painel <span aria-hidden="true">&#8594;</span></button>
+      <p id="login-error" class="form-error" role="alert"></p>
+    </form>
+  </div>
+
+  <div id="app-view" class="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Agenda Juridica - inicio"><span class="brand-mark">AJ</span><span>Agenda<br><strong>Juridica</strong></span></a>
+      <nav aria-label="Navegacao principal">
+        <a class="nav-item active" href="#dashboard" data-view="dashboard"><span class="nav-icon">&#9632;</span> Vis&atilde;o geral</a>
+        <a class="nav-item" href="#agenda" data-view="agenda"><span class="nav-icon">&#9633;</span> Agenda</a>
+        <a class="nav-item" href="#processos" data-view="processos"><span class="nav-icon">&#9670;</span> Processos</a>
+        <a class="nav-item" href="#equipe" data-view="equipe"><span class="nav-icon">&#9673;</span> Equipe</a>
+      </nav>
+      <div class="sidebar-foot"><div class="security-note"><span>&#10003;</span><div><strong>Ambiente seguro</strong><small>Sessao protegida</small></div></div><button id="logout-button" class="logout-button" type="button">Sair</button></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar"><div class="mobile-brand"><span class="brand-mark">AJ</span> Agenda Juridica</div><div class="topbar-actions"><button id="refresh-button" class="icon-button" type="button" aria-label="Atualizar painel" title="Atualizar painel">&#8635;</button><div class="user-chip"><span id="user-avatar" class="avatar">AJ</span><span><strong id="user-name">Advogado</strong><small id="user-role">Equipe juridica</small></span></div></div></header>
+      <section id="dashboard-view" class="view-panel" data-view-panel="dashboard">
+        <section class="page-heading"><div><p class="eyebrow">Vis&atilde;o geral / <span id="today-label">Hoje</span></p><h1>Bom dia, <span id="greeting-name">Doutor</span>.</h1><p class="muted">Aqui est&aacute; o que merece sua aten&ccedil;&atilde;o nesta semana.</p></div><button id="new-task-button" class="primary-button compact" type="button"><span aria-hidden="true">+</span> Nova atividade</button></section>
+        <section class="summary-grid" aria-label="Resumo da agenda"><article class="summary-card accent-blue"><span class="summary-label">Pend&ecirc;ncias abertas</span><strong id="pending-total">--</strong><span class="summary-meta">aguardando andamento</span></article><article class="summary-card accent-coral"><span class="summary-label">Prazos vencidos</span><strong id="overdue-total">--</strong><span class="summary-meta alert-text">exigem a&ccedil;&atilde;o hoje</span></article><article class="summary-card accent-yellow"><span class="summary-label">Em andamento</span><strong id="progress-total">--</strong><span class="summary-meta">sendo acompanhadas</span></article><article class="summary-card accent-green"><span class="summary-label">Conclu&iacute;das</span><strong id="completed-total">--</strong><span class="summary-meta">hist&oacute;rico total</span></article></section>
+        <section class="schedule-section"><div class="section-heading"><div><p class="eyebrow">Semana de trabalho</p><h2 id="week-label">Carregando agenda...</h2></div><div class="week-controls"><button id="previous-week" class="icon-button" type="button" aria-label="Semana anterior">&#8592;</button><button id="today-button" class="text-button" type="button">Hoje</button><button id="next-week" class="icon-button" type="button" aria-label="Pr&oacute;xima semana">&#8594;</button></div></div><div id="schedule-grid" class="schedule-grid" aria-live="polite"></div><div id="empty-state" class="empty-state" hidden><span class="empty-icon">&#10003;</span><h3>Nenhuma atividade nesta semana</h3><p>Use &ldquo;Nova atividade&rdquo; para organizar o pr&oacute;ximo passo.</p></div></section>
+        <p id="dashboard-error" class="dashboard-error" role="alert"></p>
+      </section>
+
+      <section id="agenda-view" class="view-panel" data-view-panel="agenda" hidden>
+        <section class="page-heading"><div><p class="eyebrow">Organiza&ccedil;&atilde;o</p><h1>Agenda</h1><p class="muted">Consulte e acompanhe todas as atividades do escrit&oacute;rio.</p></div><button id="new-agenda-task-button" class="primary-button compact" type="button"><span aria-hidden="true">+</span> Nova atividade</button></section>
+        <form id="agenda-filters" class="filter-bar" role="search">
+          <label class="search-field"><span class="sr-only">Buscar atividade</span><input id="agenda-search" name="search" type="search" placeholder="Buscar por t&iacute;tulo ou descri&ccedil;&atilde;o"></label>
+          <label><span class="sr-only">Filtrar por status</span><select id="agenda-status" name="status"><option value="">Todos os status</option><option value="PENDING">Pendente</option><option value="IN_PROGRESS">Em andamento</option><option value="COMPLETED">Conclu&iacute;da</option><option value="CANCELED">Cancelada</option></select></label>
+          <label><span class="sr-only">Filtrar por categoria</span><select id="agenda-category" name="category"><option value="">Todas as categorias</option><option value="DEADLINE">Prazo</option><option value="HEARING">Audi&ecirc;ncia</option><option value="PENDING_DOCUMENT">Documenta&ccedil;&atilde;o</option><option value="CLIENT_MEETING">Reuni&atilde;o com cliente</option><option value="INTERNAL_MEETING">Reuni&atilde;o interna</option><option value="CASE_PENDING_ITEM">Resposta em processo</option><option value="URGENT_PROTOCOL">Protocolo urgente</option><option value="DOCUMENT_COLLECTION">Levantamento de documentos</option><option value="OTHER">Outra atividade</option></select></label>
+          <button class="text-button filter-button" type="submit">Filtrar</button>
+        </form>
+        <div id="agenda-list" class="record-list" aria-live="polite"></div>
+        <p id="agenda-error" class="dashboard-error" role="alert"></p>
+      </section>
+
+      <section id="processos-view" class="view-panel" data-view-panel="processos" hidden>
+        <section class="page-heading"><div><p class="eyebrow">Acompanhamento jur&iacute;dico</p><h1>Processos</h1><p class="muted">Atividades e respostas pendentes vinculadas ao andamento processual.</p></div></section>
+        <div id="processos-list" class="record-list" aria-live="polite"></div>
+        <p id="processos-error" class="dashboard-error" role="alert"></p>
+      </section>
+
+      <section id="equipe-view" class="view-panel" data-view-panel="equipe" hidden>
+        <section class="page-heading"><div><p class="eyebrow">Escrit&oacute;rio</p><h1>Equipe</h1><p class="muted">Visualize os profissionais e seus perfis de acesso.</p></div></section>
+        <div id="team-list" class="team-grid" aria-live="polite"></div>
+        <p id="team-error" class="dashboard-error" role="alert"></p>
+      </section>
+    </main>
+  </div>
+  <div id="task-modal" class="modal-backdrop" hidden>
+    <form id="task-form" class="task-modal" aria-labelledby="task-modal-title">
+      <div class="modal-heading"><div><p class="eyebrow">Organizar agenda</p><h2 id="task-modal-title">Nova atividade</h2></div><button id="close-modal" class="icon-button" type="button" aria-label="Fechar">&times;</button></div>
+      <label for="task-title">Título</label><input id="task-title" name="title" required maxlength="160" placeholder="Ex.: Revisar contrato do cliente">
+      <div class="form-row"><div><label for="task-category">Categoria</label><select id="task-category" name="category" required><option value="DEADLINE">Prazo</option><option value="HEARING">Audiência</option><option value="PENDING_DOCUMENT">Documentação pendente</option><option value="CLIENT_MEETING">Reunião com cliente</option><option value="INTERNAL_MEETING">Reunião interna</option><option value="CASE_PENDING_ITEM">Resposta em processo</option><option value="URGENT_PROTOCOL">Protocolo urgente</option></select></div><div><label for="task-priority">Prioridade</label><select id="task-priority" name="priority" required><option value="NORMAL">Normal</option><option value="HIGH">Alta</option><option value="URGENT">Urgente</option></select></div></div>
+      <div class="form-row"><div><label for="task-date">Data</label><input id="task-date" name="scheduledDate" type="date"></div><div><label for="task-time">Horário</label><input id="task-time" name="scheduledTime" type="time"></div></div>
+      <label for="task-description">Observações <span class="optional">(opcional)</span></label><textarea id="task-description" name="description" rows="3" maxlength="4000" placeholder="Detalhes importantes para a equipe"></textarea>
+      <p id="task-error" class="form-error" role="alert"></p><div class="modal-actions"><button id="cancel-modal" class="text-button" type="button">Cancelar</button><button id="save-task" class="primary-button compact" type="submit">Salvar atividade</button></div>
+    </form>
+  </div>
+  <script src="/assets/app.js"></script>
+</body>
+</html>
