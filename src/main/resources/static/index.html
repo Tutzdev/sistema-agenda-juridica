@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#102a43">
-  <title>Agenda Juridica | Painel</title>
+  <meta name="theme-color" content="#0a0a0a">
+  <title>Vasconcelos e Amaral | Agenda Jur&iacute;dica</title>
   <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
   <div id="login-view" class="login-shell" hidden>
     <div class="login-art" aria-hidden="true">
-      <div class="seal">AJ</div>
-      <p class="eyebrow">Escritorio em ordem</p>
+      <img class="login-logo" src="/assets/logo-vasconcelos-amaral.png" alt="Vasconcelos e Amaral Advogados Associados">
+      <p class="eyebrow">Escrit&oacute;rio em ordem</p>
       <h1>Decisoes melhores com a agenda certa.</h1>
       <p>Centralize prazos, audiencias e compromissos em um unico lugar.</p>
     </div>
@@ -30,7 +30,7 @@
 
   <div id="app-view" class="app-shell" hidden>
     <aside class="sidebar">
-      <a class="brand" href="/" aria-label="Agenda Juridica - inicio"><span class="brand-mark">AJ</span><span>Agenda<br><strong>Juridica</strong></span></a>
+      <a class="brand" href="/" aria-label="Vasconcelos e Amaral - in&iacute;cio"><img src="/assets/logo-vasconcelos-amaral.png" alt="Vasconcelos e Amaral Advogados Associados"></a>
       <nav aria-label="Navegacao principal">
         <a class="nav-item active" href="#dashboard" data-view="dashboard"><span class="nav-icon">&#9632;</span> Vis&atilde;o geral</a>
         <a class="nav-item" href="#agenda" data-view="agenda"><span class="nav-icon">&#9633;</span> Agenda</a>
@@ -41,7 +41,7 @@
     </aside>
 
     <main class="main-content">
-      <header class="topbar"><div class="mobile-brand"><span class="brand-mark">AJ</span> Agenda Juridica</div><div class="topbar-actions"><button id="refresh-button" class="icon-button" type="button" aria-label="Atualizar painel" title="Atualizar painel">&#8635;</button><div class="user-chip"><span id="user-avatar" class="avatar">AJ</span><span><strong id="user-name">Advogado</strong><small id="user-role">Equipe juridica</small></span></div></div></header>
+      <header class="topbar"><div class="mobile-brand"><img src="/assets/logo-vasconcelos-amaral.png" alt="Vasconcelos e Amaral Advogados Associados"></div><div class="topbar-actions"><button id="refresh-button" class="icon-button" type="button" aria-label="Atualizar painel" title="Atualizar painel">&#8635;</button><div class="user-chip"><span id="user-avatar" class="avatar">VA</span><span><strong id="user-name">Advogado</strong><small id="user-role">Equipe juridica</small></span></div></div></header>
       <section id="dashboard-view" class="view-panel" data-view-panel="dashboard">
         <section class="page-heading"><div><p class="eyebrow">Vis&atilde;o geral / <span id="today-label">Hoje</span></p><h1>Bom dia, <span id="greeting-name">Doutor</span>.</h1><p class="muted">Aqui est&aacute; o que merece sua aten&ccedil;&atilde;o nesta semana.</p></div><button id="new-task-button" class="primary-button compact" type="button"><span aria-hidden="true">+</span> Nova atividade</button></section>
         <section class="summary-grid" aria-label="Resumo da agenda"><article class="summary-card accent-blue"><span class="summary-label">Pend&ecirc;ncias abertas</span><strong id="pending-total">--</strong><span class="summary-meta">aguardando andamento</span></article><article class="summary-card accent-coral"><span class="summary-label">Prazos vencidos</span><strong id="overdue-total">--</strong><span class="summary-meta alert-text">exigem a&ccedil;&atilde;o hoje</span></article><article class="summary-card accent-yellow"><span class="summary-label">Em andamento</span><strong id="progress-total">--</strong><span class="summary-meta">sendo acompanhadas</span></article><article class="summary-card accent-green"><span class="summary-label">Conclu&iacute;das</span><strong id="completed-total">--</strong><span class="summary-meta">hist&oacute;rico total</span></article></section>

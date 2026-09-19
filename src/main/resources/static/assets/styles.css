@@ -80,3 +80,97 @@ button:disabled { cursor:wait; opacity:.65; }
 .modal-backdrop { position:fixed; inset:0; z-index:10; display:grid; place-items:center; padding:20px; background:rgba(16,42,67,.48); }.task-modal { width:min(100%,540px); max-height:calc(100vh - 40px); overflow:auto; padding:26px; border-radius:7px; background:#fff; box-shadow:0 24px 70px rgba(16,42,67,.24); }.modal-heading { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:22px; }.modal-heading h2 { margin:8px 0 0; font:600 27px 'Fraunces',serif; }.task-modal label { display:block; margin:15px 0 7px; font-size:12px; font-weight:700; }.task-modal input,.task-modal select,.task-modal textarea { width:100%; border:1px solid #dce5e4; border-radius:5px; padding:11px 12px; outline:0; color:var(--ink); background:#fbfcfb; }.task-modal textarea { resize:vertical; }.task-modal input:focus,.task-modal select:focus,.task-modal textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(43,108,176,.12); }.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }.optional { color:var(--muted); font-weight:400; }.modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:12px; }.modal-actions .text-button { height:40px; }.modal-actions .primary-button { padding:11px 16px; }
 @media(max-width:900px){.sidebar{width:190px}.main-content{padding-inline:24px}.summary-grid{grid-template-columns:repeat(2,1fr)}.schedule-grid{grid-template-columns:repeat(7,155px)}.filter-bar{grid-template-columns:1fr 1fr}.filter-bar .search-field{grid-column:1/-1}.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.login-shell{display:block}.login-art{min-height:42vh;padding:36px 26px}.login-art h1{font-size:39px}.login-form{padding:42px 0 50px}.sidebar{display:none}.main-content{padding:0 16px 40px}.mobile-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:12px}.mobile-brand .brand-mark{width:30px;height:30px}.topbar{min-height:66px}.user-chip>span:last-child{display:none}.page-heading{display:block;padding:35px 0 26px}.page-heading .primary-button{margin-top:22px;width:100%}.summary-grid{gap:9px}.summary-card{padding:15px 14px}.summary-card strong{font-size:25px}.schedule-section{margin-top:36px}.section-heading{align-items:center}.section-heading h2{font-size:22px}.week-controls{gap:7px}.schedule-grid{margin-inline:-16px;padding-inline:16px}.dashboard-error{text-align:left}.filter-bar{grid-template-columns:1fr}.filter-bar .search-field{grid-column:auto}.record-item{grid-template-columns:1fr;padding:16px}.record-actions{justify-content:flex-start}.team-grid{grid-template-columns:1fr}}
+
+/* Identidade Vasconcelos e Amaral: preto, grafite e dourado. */
+:root {
+  --ink:#f4ead5;
+  --muted:#aaa08e;
+  --paper:#10100f;
+  --white:#181816;
+  --line:#3b3326;
+  --blue:#c9a45d;
+  --coral:#d99068;
+  --yellow:#d4af69;
+  --green:#bda368;
+  --gold:#d7b56d;
+  --gold-bright:#f0d595;
+  --black:#080808;
+  --shadow:0 16px 38px rgba(0,0,0,.32);
+}
+
+body { background:var(--black); }
+.login-shell { background:#0c0c0b; }
+.login-art {
+  position:relative;
+  overflow:hidden;
+  color:#f8f0de;
+  background:radial-gradient(circle at 20% 20%,rgba(215,181,109,.13),transparent 34%),linear-gradient(145deg,#050505,#11100d 72%,#2a2113);
+  border-right:1px solid #3f3422;
+}
+.login-art::after { content:''; position:absolute; right:-150px; bottom:-150px; width:420px; height:420px; border:1px solid rgba(215,181,109,.12); border-radius:50%; box-shadow:0 0 0 55px rgba(215,181,109,.025),0 0 0 110px rgba(215,181,109,.018); pointer-events:none; }
+.login-logo { position:relative; z-index:1; width:min(280px,75%); height:auto; margin:0 0 22px; object-fit:contain; filter:drop-shadow(0 10px 24px rgba(0,0,0,.45)); }
+.login-art h1,.login-art p { position:relative; z-index:1; }
+.login-art p:not(.eyebrow) { color:#c9bea8; }
+.login-form input,.filter-bar input,.filter-bar select,.task-modal input,.task-modal select,.task-modal textarea { color:var(--ink); background:#11110f; border-color:#413827; color-scheme:dark; }
+.login-form input::placeholder,.task-modal input::placeholder,.task-modal textarea::placeholder,.filter-bar input::placeholder { color:#776f61; }
+.login-form input:focus,.filter-bar input:focus,.filter-bar select:focus,.task-modal input:focus,.task-modal select:focus,.task-modal textarea:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(215,181,109,.13); }
+.primary-button { color:#17130c; background:linear-gradient(135deg,var(--gold-bright),#bc9148); box-shadow:0 8px 20px rgba(188,145,72,.14); }
+.primary-button:hover { color:#080706; background:linear-gradient(135deg,#f7dfa5,#d0a556); box-shadow:0 10px 25px rgba(215,181,109,.22); }
+.eyebrow,.login-art .eyebrow { color:var(--gold); }
+.form-error,.dashboard-error { color:#e6a080; }
+
+.sidebar { width:260px; background:linear-gradient(180deg,#050505,#0c0b09); border-right:1px solid #342b1e; color:#e0d5bf; padding:24px 22px 20px; }
+.brand { justify-content:center; }
+.brand img { display:block; width:190px; height:auto; filter:drop-shadow(0 8px 18px rgba(0,0,0,.5)); }
+.sidebar nav { margin-top:35px; }
+.nav-item { color:#a89f8e; }
+.nav-item:hover,.nav-item.active { color:var(--gold-bright); background:linear-gradient(90deg,rgba(215,181,109,.18),rgba(215,181,109,.06)); box-shadow:inset 2px 0 var(--gold); }
+.nav-icon { color:var(--gold); }
+.security-note { border-color:#342b1e; color:#c1a76e; }
+.security-note strong { color:#e9dcc3; }
+.logout-button { color:#a89f8e; }
+.logout-button:hover { color:var(--gold-bright); }
+
+.main-content { background:radial-gradient(circle at 95% 0,rgba(215,181,109,.055),transparent 28%),var(--paper); }
+.topbar { border-color:var(--line); }
+.mobile-brand img { display:block; width:105px; height:58px; object-fit:contain; object-position:left center; }
+.avatar,.team-avatar { color:#21190d; background:linear-gradient(135deg,#eed397,#b98e47); }
+.icon-button,.text-button,.record-action { color:var(--ink); background:#191816; border-color:var(--line); }
+.icon-button:hover,.text-button:hover,.record-action:hover { color:var(--gold-bright); border-color:#806b42; background:#211e18; }
+.page-heading h1 span,.today .day-number { color:var(--gold); }
+.summary-card,.day-column,.empty-state,.filter-bar,.record-item,.list-message,.team-card,.task-modal { background:linear-gradient(145deg,#1a1916,#141412); border-color:var(--line); box-shadow:var(--shadow); }
+.summary-card { border-top-color:var(--gold); }
+.accent-coral { border-top-color:#bd795a; }
+.accent-yellow { border-top-color:#e1bd70; }
+.accent-green { border-top-color:#9f8c60; }
+.day-column.today { border-color:var(--gold); box-shadow:0 0 0 1px rgba(215,181,109,.16),var(--shadow); }
+.day-header,.team-role { border-color:var(--line); }
+.task-card { border-left-color:#9f895b; background:#201e19; }
+.task-card.urgent { border-left-color:#c77b5b; background:#251a16; }
+.task-card.high { border-left-color:var(--gold); }
+.task-time,.task-type { color:#a99d87; }
+.empty-day { color:#5f594e; }
+.empty-icon { color:#241c0e; background:var(--gold); }
+.record-item { border-left-color:#806b42; }
+.record-item.priority-high { border-left-color:var(--gold); }
+.status-badge { color:#cfc4ae; background:#292722; }
+.status-badge.status-completed { color:#e8d39f; background:#342d1e; }
+.status-badge.status-in-progress { color:#f0d595; background:#302716; }
+.status-badge.status-canceled { color:#a79f92; background:#282624; }
+.cancel-action { color:#d7bd82; border-color:#55462b; }
+.cancel-action:hover { color:#f0d595; border-color:var(--gold); background:#292315; }
+.danger-action { color:#e0a087; border-color:#5c392e; }
+.danger-action:hover { color:#f0b098; border-color:#b86f53; background:#2b1b16; }
+.active-dot { background:var(--gold); box-shadow:0 0 7px rgba(215,181,109,.55); }
+.inactive-dot { background:#706a5f; box-shadow:none; }
+.modal-backdrop { background:rgba(0,0,0,.76); backdrop-filter:blur(3px); }
+.task-modal { box-shadow:0 28px 80px rgba(0,0,0,.65); }
+
+@media(max-width:900px) { .sidebar { width:220px; } .brand img { width:170px; } }
+@media(max-width:640px) {
+  .login-art { min-height:48vh; align-items:center; text-align:center; border-right:0; border-bottom:1px solid #3f3422; }
+  .login-logo { width:190px; margin-bottom:12px; }
+  .login-art p:not(.eyebrow) { margin-inline:auto; }
+  .main-content { background:var(--paper); }
+  .mobile-brand { display:flex; }
+}
