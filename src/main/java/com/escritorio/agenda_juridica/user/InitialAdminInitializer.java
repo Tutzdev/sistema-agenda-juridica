@@ -36,11 +36,21 @@ public class InitialAdminInitializer implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        if (userRepository.count() != 0 || !hasCompleteConfiguration()) {
+        if (!hasCompleteConfiguration()) {
             return;
         }
-        userRepository.save(new User(name, email, passwordEncoder.encode(password), UserRole.ADMIN));
-        LOGGER.info("Administrador inicial criado para o e-mail configurado.");
+
+        userRepository.findByEmailIgnoreCase(email).ifPresentOrElse(
+                user -> {
+                    user.update(name, email, UserRole.ADMIN, passwordEncoder.encode(password));
+                    user.setActive(true);
+                    userRepository.save(user);
+                    LOGGER.info("Administrador configurado atualizado para o e-mail informado.");
+                },
+                () -> {
+                    userRepository.save(new User(name, email, passwordEncoder.encode(password), UserRole.ADMIN));
+                    LOGGER.info("Administrador inicial criado para o e-mail configurado.");
+                });
     }
 
     private boolean hasCompleteConfiguration() {

@@ -51,6 +51,22 @@
 
       <section id="agenda-view" class="view-panel" data-view-panel="agenda" hidden>
         <section class="page-heading"><div><p class="eyebrow">Organiza&ccedil;&atilde;o</p><h1>Agenda</h1><p class="muted">Consulte e acompanhe todas as atividades do escrit&oacute;rio.</p></div><button id="new-agenda-task-button" class="primary-button compact" type="button"><span aria-hidden="true">+</span> Nova atividade</button></section>
+        <section class="agenda-week-section" aria-labelledby="agenda-week-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Agenda semanal</p>
+              <h2 id="agenda-week-title">Carregando semana...</h2>
+              <p class="muted agenda-week-subtitle">Compromissos organizados por data e horário.</p>
+            </div>
+            <div class="week-controls">
+              <button id="agenda-previous-week" class="icon-button" type="button" aria-label="Semana anterior">&#8592;</button>
+              <button id="agenda-today" class="text-button" type="button">Hoje</button>
+              <button id="agenda-next-week" class="icon-button" type="button" aria-label="Próxima semana">&#8594;</button>
+            </div>
+          </div>
+          <div id="agenda-weekly-dashboard" class="agenda-weekly-dashboard" aria-live="polite"></div>
+          <p id="agenda-week-error" class="dashboard-error" role="alert"></p>
+        </section>
         <form id="agenda-filters" class="filter-bar" role="search">
           <label class="search-field"><span class="sr-only">Buscar atividade</span><input id="agenda-search" name="search" type="search" placeholder="Buscar por t&iacute;tulo ou descri&ccedil;&atilde;o"></label>
           <label><span class="sr-only">Filtrar por status</span><select id="agenda-status" name="status"><option value="">Todos os status</option><option value="PENDING">Pendente</option><option value="IN_PROGRESS">Em andamento</option><option value="COMPLETED">Conclu&iacute;da</option><option value="CANCELED">Cancelada</option></select></label>

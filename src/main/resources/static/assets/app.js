@@ -1,5 +1,6 @@
 const state = {
   referenceDate: new Date(),
+  agendaReferenceDate: new Date(),
   csrf: null,
   user: null,
   currentView: 'dashboard'
@@ -205,11 +206,41 @@ function renderTaskRows(items, targetSelector, emptyTitle, emptyText, allowDelet
   }).join('');
 }
 
+function renderAgendaWeeklyDashboard(data) {
+  const dashboard = $('#agenda-weekly-dashboard');
+  const days = data.weeklyTasks || [];
+  const weekStart = formatDate(data.weekStart, { day: '2-digit', month: 'long' });
+  const weekEnd = formatDate(data.weekEnd, { day: '2-digit', month: 'long', year: 'numeric' });
+  $('#agenda-week-title').textContent = `${weekStart} a ${weekEnd}`;
+  dashboard.innerHTML = days.map((day) => {
+    const dateLabel = formatDate(day.date, { weekday: 'long', day: '2-digit', month: 'long' });
+    const isToday = day.date === toIsoDate(new Date());
+    const tasks = [...(day.tasks || [])].sort((a, b) => taskTime(a).localeCompare(taskTime(b)));
+    return `<section class="agenda-day-card ${isToday ? 'is-today' : ''}">` +
+      `<header class="agenda-day-header"><div><span class="agenda-day-weekday">${escapeHtml(dateLabel.split(',')[0])}</span><strong>${escapeHtml(dateLabel.replace(/^.*?,\s*/, ''))}</strong></div><span class="agenda-day-count">${tasks.length} ${tasks.length === 1 ? 'compromisso' : 'compromissos'}</span></header>` +
+      `<div class="agenda-day-tasks">${tasks.length ? tasks.map((task) => `<article class="agenda-appointment"><div class="agenda-appointment-time">${escapeHtml(taskTime(task))}</div><div class="agenda-appointment-content"><strong>${escapeHtml(task.title)}</strong><span>${escapeHtml(categoryLabels[task.category] || 'Atividade')} · ${escapeHtml(statusLabels[task.status] || 'Atividade')}</span></div>${task.priority === 'URGENT' ? '<span class="agenda-priority">Urgente</span>' : ''}</article>`).join('') : '<div class="agenda-day-empty">Nenhum compromisso para este dia.</div>'}</div></section>`;
+  }).join('');
+}
+
+async function loadAgendaWeeklyDashboard() {
+  const target = $('#agenda-weekly-dashboard');
+  const errorTarget = $('#agenda-week-error');
+  target.innerHTML = '<div class="list-message">Carregando agenda semanal...</div>';
+  errorTarget.textContent = '';
+  try {
+    const data = await request(`/api/dashboard?referenceDate=${toIsoDate(state.agendaReferenceDate)}`);
+    renderAgendaWeeklyDashboard(data);
+  } catch (error) {
+    if (error.status === 401) showLogin(error.message);
+    else { target.innerHTML = ''; errorTarget.textContent = error.message; }
+  }
+}
 async function loadAgenda() {
   const target = $('#agenda-list');
   const errorTarget = $('#agenda-error');
   target.innerHTML = '<div class="list-message">Carregando atividades...</div>';
   errorTarget.textContent = '';
+  await loadAgendaWeeklyDashboard();
   const params = new URLSearchParams({ size: '100' });
   const search = $('#agenda-search').value.trim();
   const status = $('#agenda-status').value;
@@ -353,6 +384,9 @@ $('#cancel-modal').addEventListener('click', () => toggleTaskModal(false));
 $('#task-modal').addEventListener('click', (event) => { if (event.target === $('#task-modal')) toggleTaskModal(false); });
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('#task-modal').hidden) toggleTaskModal(false); });
 $('#agenda-filters').addEventListener('submit', (event) => { event.preventDefault(); loadAgenda(); });
+$('#agenda-today').addEventListener('click', () => { state.agendaReferenceDate = new Date(); loadAgendaWeeklyDashboard(); });
+$('#agenda-previous-week').addEventListener('click', () => { state.agendaReferenceDate.setDate(state.agendaReferenceDate.getDate() - 7); loadAgendaWeeklyDashboard(); });
+$('#agenda-next-week').addEventListener('click', () => { state.agendaReferenceDate.setDate(state.agendaReferenceDate.getDate() + 7); loadAgendaWeeklyDashboard(); });
 document.addEventListener('click', (event) => {
   const actionButton = event.target.closest('[data-task-action]');
   if (actionButton) changeTaskStatus(actionButton);
