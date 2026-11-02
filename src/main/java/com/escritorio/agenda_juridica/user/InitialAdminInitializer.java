@@ -30,7 +30,12 @@ public class InitialAdminInitializer implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        properties.completeAccounts().forEach(this::configure);
+        // A lista só semeia um banco vazio, para não desfazer trocas de e-mail/senha feitas pela tela.
+        if (userRepository.count() == 0) {
+            properties.seedAccounts().forEach(this::configure);
+        }
+        // O administrador único (app.admin.*) segue criando ou redefinindo: serve de recuperação de acesso.
+        properties.recoveryAccount().ifPresent(this::configure);
     }
 
     private void configure(InitialAdminProperties.Account account) {

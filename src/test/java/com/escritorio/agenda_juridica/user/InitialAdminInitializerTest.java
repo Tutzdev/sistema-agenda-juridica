@@ -35,7 +35,8 @@ class InitialAdminInitializerTest {
     void doesNothingWithoutConfiguredCredentials() {
         initializer(new Account("", "", ""), null).run(null);
 
-        verifyNoInteractions(userRepository, passwordEncoder);
+        verify(userRepository, never()).save(any(User.class));
+        verifyNoInteractions(passwordEncoder);
     }
 
     @Test
@@ -56,7 +57,17 @@ class InitialAdminInitializerTest {
     }
 
     @Test
+    void doesNotSeedTheListWhenUsersAlreadyExist() {
+        when(userRepository.count()).thenReturn(2L);
+
+        initializer(null, List.of(new Account("Primeiro", "primeiro@escritorio.com", "senha-um-configurada"))).run(null);
+
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void createsEveryAdministratorFromTheList() {
+        when(userRepository.count()).thenReturn(0L);
         when(userRepository.findByEmailIgnoreCase(any())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(any())).thenReturn("hash");
 
