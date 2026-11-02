@@ -123,6 +123,7 @@ const api = {
 
   me: () => api.request('/api/auth/me'),
   login: (credentials) => api.request('/api/auth/login', { method: 'POST', body: credentials }),
+  updateAccount: (payload) => api.request('/api/auth/account', { method: 'PUT', body: payload }),
   logout: () => api.request('/api/auth/logout', { method: 'POST' }),
   dashboard: (referenceDate) => api.request(`/api/dashboard?referenceDate=${toIsoDate(referenceDate)}`),
   tasks: (params) => api.request(`/api/tasks?${new URLSearchParams({ size: '100', ...params })}`),
@@ -293,11 +294,15 @@ function showApp(user) {
   state.team = null;
   $('#login-view').hidden = true;
   shell.hidden = false;
+  renderUserChip(user);
+  navigate(viewFromHash());
+}
+
+function renderUserChip(user) {
   $('#user-name').textContent = user.name;
   $('#user-role').textContent = ROLE_LABELS[user.role] || 'Equipe jurídica';
   $('#user-avatar').textContent = initials(user.name);
   $('#greeting-name').textContent = firstName(user.name);
-  navigate(viewFromHash());
 }
 
 function showLogin(message = '') {
@@ -622,6 +627,89 @@ async function runTaskAction(button) {
 const taskDialog = $('#task-dialog');
 const taskForm = $('#task-form');
 
+/* ---------- Campos de data (dia / mês / ano) e hora (24h) ----------
+   Mês e ano já vêm no atual; sem dia escolhido, a data fica em branco. */
+
+const MONTH_NAMES = Array.from({ length: 12 }, (_, index) =>
+  new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date(2000, index, 1)));
+const pad2 = (value) => String(value).padStart(2, '0');
+const option = (value, label, selected = false) =>
+  `<option value="${value}"${selected ? ' selected' : ''}>${label}</option>`;
+
+function buildDateField(container) {
+  const id = container.dataset.id;
+  const name = container.dataset.dateField;
+  const label = container.dataset.label;
+  const now = new Date();
+  const year = now.getFullYear();
+  const days = Array.from({ length: 31 }, (_, index) => option(pad2(index + 1), pad2(index + 1))).join('');
+  const months = MONTH_NAMES.map((month, index) => option(pad2(index + 1), month, index === now.getMonth())).join('');
+  const years = Array.from({ length: 7 }, (_, index) => year - 1 + index)
+    .map((value) => option(value, value, value === year)).join('');
+
+  container.setAttribute('role', 'group');
+  container.setAttribute('aria-label', label);
+  container.innerHTML = `
+    <select id="${id}-day" class="control" name="${name}Day" aria-label="${label}: dia">${option('', 'Dia')}${days}</select>
+    <select id="${id}-month" class="control" name="${name}Month" aria-label="${label}: mês">${months}</select>
+    <select id="${id}-year" class="control" name="${name}Year" aria-label="${label}: ano">${years}</select>`;
+}
+
+function buildTimeField(container) {
+  const id = container.dataset.id;
+  const name = container.dataset.timeField;
+  const hours = Array.from({ length: 24 }, (_, hour) => option(pad2(hour), pad2(hour))).join('');
+  const minutes = Array.from({ length: 12 }, (_, index) => option(pad2(index * 5), pad2(index * 5))).join('');
+
+  container.setAttribute('role', 'group');
+  container.innerHTML = `
+    <select id="${id}-hour" class="control" name="${name}Hour" aria-label="Hora">${option('', '--')}${hours}</select>
+    <span class="time-sep" aria-hidden="true">:</span>
+    <select id="${id}-minute" class="control" name="${name}Minute" aria-label="Minutos">${minutes}</select>`;
+}
+
+function ensureOption(select, value) {
+  if (![...select.options].some((item) => item.value === value)) select.insertAdjacentHTML('beforeend', option(value, value));
+}
+
+function setDateField(name, isoDate) {
+  const now = new Date();
+  const [year, month, day] = isoDate ? isoDate.split('-') : [String(now.getFullYear()), pad2(now.getMonth() + 1), ''];
+  const yearSelect = taskForm.elements[`${name}Year`];
+  ensureOption(yearSelect, year);
+  taskForm.elements[`${name}Day`].value = day;
+  taskForm.elements[`${name}Month`].value = month;
+  yearSelect.value = year;
+}
+
+function readDateField(name, label) {
+  const day = taskForm.elements[`${name}Day`].value;
+  if (!day) return null;
+  const month = taskForm.elements[`${name}Month`].value;
+  const year = taskForm.elements[`${name}Year`].value;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  if (date.getMonth() !== Number(month) - 1) {
+    throw new Error(`"${label}": ${day} de ${MONTH_NAMES[Number(month) - 1]} não existe.`);
+  }
+  return `${year}-${month}-${day}`;
+}
+
+function setTimeField(name, time) {
+  const [hour, minute] = time ? time.slice(0, 5).split(':') : ['', '00'];
+  const minuteSelect = taskForm.elements[`${name}Minute`];
+  ensureOption(minuteSelect, minute);
+  taskForm.elements[`${name}Hour`].value = hour;
+  minuteSelect.value = minute;
+}
+
+function readTimeField(name) {
+  const hour = taskForm.elements[`${name}Hour`].value;
+  return hour ? `${hour}:${taskForm.elements[`${name}Minute`].value}` : null;
+}
+
+const DATE_FIELDS = { scheduledDate: 'Data', dueDate: 'Vence em', reminderDate: 'Lembrar em' };
+const TIME_FIELDS = ['scheduledTime', 'dueTime'];
+
 function fillCategoryOptions() {
   const options = Object.entries(CATEGORY_LABELS)
     .map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
@@ -651,11 +739,10 @@ async function openTaskDialog(task = null) {
   $('#save-task').textContent = task ? 'Salvar alterações' : 'Salvar atividade';
 
   if (task) {
-    const fields = ['title', 'description', 'category', 'priority', 'scheduledDate', 'dueDate', 'reminderDate'];
-    fields.forEach((name) => { taskForm.elements[name].value = task[name] ?? ''; });
-    taskForm.elements.scheduledTime.value = task.scheduledTime?.slice(0, 5) ?? '';
-    taskForm.elements.dueTime.value = task.dueTime?.slice(0, 5) ?? '';
+    ['title', 'description', 'category', 'priority'].forEach((name) => { taskForm.elements[name].value = task[name] ?? ''; });
   }
+  Object.keys(DATE_FIELDS).forEach((name) => setDateField(name, task?.[name]));
+  TIME_FIELDS.forEach((name) => setTimeField(name, task?.[name]));
 
   await fillResponsibleOptions(task?.responsibleUser?.id);
   taskDialog.showModal();
@@ -670,11 +757,11 @@ function taskPayload() {
     description: optional('description'),
     category: form.get('category'),
     priority: form.get('priority'),
-    scheduledDate: optional('scheduledDate'),
-    scheduledTime: optional('scheduledTime'),
-    dueDate: optional('dueDate'),
-    dueTime: optional('dueTime'),
-    reminderDate: optional('reminderDate'),
+    scheduledDate: readDateField('scheduledDate', DATE_FIELDS.scheduledDate),
+    scheduledTime: readTimeField('scheduledTime'),
+    dueDate: readDateField('dueDate', DATE_FIELDS.dueDate),
+    dueTime: readTimeField('dueTime'),
+    reminderDate: readDateField('reminderDate', DATE_FIELDS.reminderDate),
     responsibleUserId: Number(form.get('responsibleUserId')) || state.user.id
   };
 }
@@ -720,6 +807,7 @@ async function submitLogin(event) {
     const user = await api.login({ email: form.get('email'), password: form.get('password') });
     await api.refreshCsrf();
     loginForm.reset();
+    resetPasswordToggles(loginForm);
     showApp(user);
   } catch (error) {
     $('#login-error').textContent = error.status === 401 || error.status === 400
@@ -728,6 +816,70 @@ async function submitLogin(event) {
   } finally {
     submit.disabled = false;
   }
+}
+
+/* ================================================================
+   Minha conta (e-mail e senha) e o "olhinho" da senha
+   ================================================================ */
+
+const accountDialog = $('#account-dialog');
+const accountForm = $('#account-form');
+
+function openAccountDialog() {
+  accountForm.reset();
+  resetPasswordToggles(accountForm);
+  $('#account-error').textContent = '';
+  accountForm.elements.email.value = state.user.email;
+  closeMobileMenu();
+  accountDialog.showModal();
+  accountForm.elements.email.focus();
+}
+
+async function submitAccount(event) {
+  event.preventDefault();
+  const email = accountForm.elements.email.value.trim();
+  const password = accountForm.elements.password.value;
+  const error = $('#account-error');
+
+  if (!email || !accountForm.elements.email.checkValidity()) {
+    error.textContent = 'Informe um e-mail válido.';
+    return accountForm.elements.email.focus();
+  }
+  if (password && password.length < 6) {
+    error.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.';
+    return accountForm.elements.password.focus();
+  }
+
+  const save = $('#save-account');
+  save.disabled = true;
+  try {
+    state.user = await api.updateAccount({ email, password: password || null });
+    state.team = null;
+    renderUserChip(state.user);
+    accountDialog.close();
+    ui.toast(password ? 'E-mail e senha atualizados.' : 'E-mail atualizado.');
+    if (state.view === 'equipe') loadTeam();
+  } catch (failure) {
+    if (failure.status === 401) { accountDialog.close(); return showLogin(failure.message); }
+    error.textContent = failure.message;
+  } finally {
+    save.disabled = false;
+  }
+}
+
+function togglePassword(button) {
+  const input = document.getElementById(button.dataset.togglePassword);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  button.setAttribute('aria-pressed', String(show));
+  button.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
+  $('use', button).setAttribute('href', show ? '#i-eye-off' : '#i-eye');
+}
+
+function resetPasswordToggles(root = document) {
+  $$('[data-toggle-password]', root).forEach((button) => {
+    if (document.getElementById(button.dataset.togglePassword).type === 'text') togglePassword(button);
+  });
 }
 
 async function logout() {
@@ -775,7 +927,11 @@ function bindEvents() {
 
   $$('[data-open-task]').forEach((button) => button.addEventListener('click', () => openTaskDialog()));
   taskForm.addEventListener('submit', submitTask);
-  $$('[data-close-dialog]').forEach((button) => button.addEventListener('click', () => taskDialog.close()));
+  $$('[data-close-dialog]').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
+
+  $$('[data-open-account]').forEach((button) => button.addEventListener('click', openAccountDialog));
+  accountForm.addEventListener('submit', submitAccount);
+  $$('[data-toggle-password]').forEach((button) => button.addEventListener('click', () => togglePassword(button)));
   $$('dialog').forEach((dialog) => dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close();
   }));
@@ -788,6 +944,8 @@ function bindEvents() {
 
 async function bootstrap() {
   fillCategoryOptions();
+  $$('[data-date-field]').forEach(buildDateField);
+  $$('[data-time-field]').forEach(buildTimeField);
   try { setCollapsed(localStorage.getItem(COLLAPSED_KEY) === 'true'); } catch { /* armazenamento indisponível */ }
   bindEvents();
 
