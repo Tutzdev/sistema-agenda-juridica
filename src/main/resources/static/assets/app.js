@@ -254,7 +254,9 @@ function taskActions(task) {
   if (task.status === 'CANCELED') {
     return button('reopen', 'Reabrir', 'reopen') + button('remove', 'Remover', 'trash', 'action--danger');
   }
-  if (task.status === 'COMPLETED') return button('reopen', 'Reabrir', 'reopen');
+  if (task.status === 'COMPLETED') {
+    return button('reopen', 'Reabrir', 'reopen') + button('remove', 'Remover', 'trash', 'action--danger');
+  }
 
   return [
     button('edit', 'Editar', 'pencil'),

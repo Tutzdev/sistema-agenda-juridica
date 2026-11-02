@@ -33,7 +33,7 @@ Num escritório de advocacia, perder um prazo processual pode custar a causa. O 
 | Lembrete ativo só quando a data do lembrete já chegou e o prazo ainda não entrou em alerta | `DeadlineClassifier` |
 | Atividade concluída ou cancelada nunca gera alerta | `DeadlineClassifier` |
 | Transições de status válidas: pendente → em andamento → concluída, com reabertura e cancelamento | `Task.changeStatus` (`EnumMap` de transições) |
-| Só atividade **cancelada** pode ser removida | `TaskService.delete` |
+| Só atividade **concluída** ou **cancelada** pode ser removida | `TaskService.delete` |
 | O último administrador ativo não pode ser desativado nem rebaixado | `UserService` |
 | Sem credenciais configuradas, nenhum administrador é criado (não existe senha padrão) | `InitialAdminInitializer` |
 | A semana de trabalho vai de segunda a sexta, no fuso `America/Sao_Paulo` | `WeekCalculator` + `Clock` de negócio |

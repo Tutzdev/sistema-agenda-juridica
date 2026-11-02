@@ -167,8 +167,8 @@ public class TaskService {
         if (!administrator && !creator) {
             throw new AccessDeniedException("Somente o criador ou um administrador pode excluir a atividade.");
         }
-        if (task.getStatus() != TaskStatus.CANCELED) {
-            throw new BusinessRuleException("Somente atividades canceladas podem ser excluídas.");
+        if (task.getStatus() != TaskStatus.CANCELED && task.getStatus() != TaskStatus.COMPLETED) {
+            throw new BusinessRuleException("Somente atividades concluídas ou canceladas podem ser excluídas.");
         }
 
         taskRepository.delete(task);
