@@ -13,11 +13,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.domain.Specification;
 
+/**
+ * Visibilidade: todo usuário, inclusive ADMIN, só enxerga atividades em que é
+ * o responsável ou o criador. As consultas de leitura recebem o {@code viewerId}.
+ */
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
 
     @Override
     @EntityGraph(attributePaths = {"responsibleUser", "createdBy"})
     Optional<Task> findById(Long id);
+
+    @EntityGraph(attributePaths = {"responsibleUser", "createdBy"})
+    @Query("""
+            select t from Task t
+            where t.id = :id
+              and (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId)
+            """)
+    Optional<Task> findVisibleById(@Param("id") Long id, @Param("viewerId") Long viewerId);
 
     @Override
     @EntityGraph(attributePaths = {"responsibleUser", "createdBy"})
@@ -26,15 +38,18 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @Query("""
             select count(t) from Task t
             where t.status = :status
+              and (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId)
               and (:responsibleUserId is null or t.responsibleUser.id = :responsibleUserId)
             """)
     long countForDashboard(@Param("status") TaskStatus status,
+            @Param("viewerId") Long viewerId,
             @Param("responsibleUserId") Long responsibleUserId);
 
     @EntityGraph(attributePaths = {"responsibleUser", "createdBy"})
     @Query("""
             select distinct t from Task t
-            where (:responsibleUserId is null or t.responsibleUser.id = :responsibleUserId)
+            where (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId)
+              and (:responsibleUserId is null or t.responsibleUser.id = :responsibleUserId)
               and (
                     t.scheduledDate between :weekStart and :weekEnd
                     or (t.status in :activeStatuses and (
@@ -48,6 +63,7 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
             @Param("weekStart") LocalDate weekStart,
             @Param("weekEnd") LocalDate weekEnd,
             @Param("upcomingEnd") LocalDate upcomingEnd,
+            @Param("viewerId") Long viewerId,
             @Param("responsibleUserId") Long responsibleUserId,
             @Param("activeStatuses") List<TaskStatus> activeStatuses);
 }

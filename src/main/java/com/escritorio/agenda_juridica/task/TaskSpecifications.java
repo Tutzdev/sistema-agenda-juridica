@@ -20,6 +20,13 @@ public final class TaskSpecifications {
                 equalValue("priority", priority), responsibleFor(responsibleUserId), containsText(search));
     }
 
+    /** Só as atividades em que o usuário é responsável ou criador (vale para qualquer perfil). */
+    public static Specification<Task> visibleTo(Long viewerId) {
+        return (root, query, builder) -> builder.or(
+                builder.equal(root.get("responsibleUser").get("id"), viewerId),
+                builder.equal(root.get("createdBy").get("id"), viewerId));
+    }
+
     public static Specification<Task> scheduledBetween(LocalDate start, LocalDate end) {
         return Specification.allOf(scheduledOnOrAfter(start), scheduledOnOrBefore(end));
     }

@@ -10,6 +10,7 @@ import java.util.Map;
 import com.escritorio.agenda_juridica.dashboard.WeekCalculator.WorkWeek;
 import com.escritorio.agenda_juridica.dashboard.dto.DailyTasksResponse;
 import com.escritorio.agenda_juridica.dashboard.dto.DashboardResponse;
+import com.escritorio.agenda_juridica.security.CurrentUserService;
 import com.escritorio.agenda_juridica.task.DeadlineAlertStatus;
 import com.escritorio.agenda_juridica.task.DeadlineClassifier;
 import com.escritorio.agenda_juridica.task.Task;
@@ -28,14 +29,16 @@ public class DashboardService {
     private final TaskMapper            taskMapper;
     private final WeekCalculator        weekCalculator;
     private final Clock                 clock;
+    private final CurrentUserService    currentUserService;
 
     public DashboardService(TaskRepository taskRepository, DeadlineClassifier classifier, TaskMapper taskMapper,
-            WeekCalculator weekCalculator, Clock clock) {
+            WeekCalculator weekCalculator, Clock clock, CurrentUserService currentUserService) {
         this.taskRepository = taskRepository;
         this.classifier = classifier;
         this.taskMapper = taskMapper;
         this.weekCalculator = weekCalculator;
         this.clock = clock;
+        this.currentUserService = currentUserService;
     }
 
     @Transactional(readOnly = true)
@@ -43,18 +46,20 @@ public class DashboardService {
 
         LocalDate referenceDate = requestedDate == null ? LocalDate.now(clock) : requestedDate;
         WorkWeek week = weekCalculator.calculate(referenceDate);
+        // Cada usuário (inclusive ADMIN) vê no painel só as atividades em que é responsável ou criador.
+        Long viewerId = currentUserService.requireCurrentUser().getId();
 
         List<Task> tasks = taskRepository.findDashboardTasks(referenceDate, week.start(), week.end(),
-                referenceDate.plusDays(classifier.upcomingDays()), responsibleUserId,
+                referenceDate.plusDays(classifier.upcomingDays()), viewerId, responsibleUserId,
                 List.of(TaskStatus.PENDING, TaskStatus.IN_PROGRESS));
 
         Map<DeadlineAlertStatus, List<TaskResponse>> alerts = classify(tasks, referenceDate);
         List<DailyTasksResponse> weeklyTasks = groupWeek(tasks, week, referenceDate);
 
         return new DashboardResponse(referenceDate, week.start(), week.end(),
-                taskRepository.countForDashboard(TaskStatus.PENDING, responsibleUserId),
-                taskRepository.countForDashboard(TaskStatus.IN_PROGRESS, responsibleUserId),
-                taskRepository.countForDashboard(TaskStatus.COMPLETED, responsibleUserId),
+                taskRepository.countForDashboard(TaskStatus.PENDING, viewerId, responsibleUserId),
+                taskRepository.countForDashboard(TaskStatus.IN_PROGRESS, viewerId, responsibleUserId),
+                taskRepository.countForDashboard(TaskStatus.COMPLETED, viewerId, responsibleUserId),
                 alerts.get(DeadlineAlertStatus.OVERDUE).size(),
                 alerts.get(DeadlineAlertStatus.DUE_TODAY).size(),
                 alerts.get(DeadlineAlertStatus.UPCOMING).size(),

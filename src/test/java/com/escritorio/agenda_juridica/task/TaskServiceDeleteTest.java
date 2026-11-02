@@ -78,7 +78,7 @@ class TaskServiceDeleteTest {
         if (status != TaskStatus.PENDING) {
             task.changeStatus(status, NOW);
         }
-        when(taskRepository.findById(10L)).thenReturn(Optional.of(task));
+        when(taskRepository.findVisibleById(10L, 1L)).thenReturn(Optional.of(task));
         return task;
     }
 }

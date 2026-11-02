@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,21 +67,21 @@ public class TaskService {
                 Sort.Order.asc("dueDate").nullsLast(), Sort.Order.asc("scheduledDate").nullsLast(),
                 Sort.Order.desc("createdAt")));
 
-        return taskRepository.findAll(TaskSpecifications.withFilters(
-            startDate, 
-            endDate, 
-            scheduledDate, 
+        return taskRepository.findAll(visible(TaskSpecifications.withFilters(
+            startDate,
+            endDate,
+            scheduledDate,
             dueDate,
-            category, 
-            status, 
-            priority, 
-            responsibleUserId, 
-            search), safePageable).map(taskMapper::toResponse);
+            category,
+            status,
+            priority,
+            responsibleUserId,
+            search)), safePageable).map(taskMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
     public Page<TaskResponse> listDay(LocalDate date, Pageable pageable) {
-        return taskRepository.findAll(TaskSpecifications.scheduledBetween(date, date),
+        return taskRepository.findAll(visible(TaskSpecifications.scheduledBetween(date, date)),
                         safePageable(pageable, Sort.by("scheduledTime")))
                 .map(taskMapper::toResponse);
     }
@@ -88,7 +89,7 @@ public class TaskService {
     @Transactional(readOnly = true)
     public Page<TaskResponse> listWeek(LocalDate referenceDate, Pageable pageable) {
         LocalDate monday = referenceDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        return taskRepository.findAll(TaskSpecifications.scheduledBetween(monday, monday.plusDays(4)),
+        return taskRepository.findAll(visible(TaskSpecifications.scheduledBetween(monday, monday.plusDays(4))),
                         safePageable(pageable, Sort.by("scheduledDate", "scheduledTime")))
                 .map(taskMapper::toResponse);
     }
@@ -97,7 +98,7 @@ public class TaskService {
     public Page<TaskResponse> listAlert(DeadlineAlertStatus alert, LocalDate referenceDate, Pageable pageable) {
 
         LocalDate date = referenceDate == null ? LocalDate.now(clock) : referenceDate;
-        return taskRepository.findAll(TaskSpecifications.withAlert(alert, date, classifier.upcomingDays()),
+        return taskRepository.findAll(visible(TaskSpecifications.withAlert(alert, date, classifier.upcomingDays())),
                         safePageable(pageable, Sort.by("dueDate", "dueTime")))
                 .map(task -> taskMapper.toResponse(task, date));
     }
@@ -158,9 +159,9 @@ public class TaskService {
 
     @Transactional
     public void delete(Long id) {
-        Task task = findTask(id);
-
         User current = currentUserService.requireCurrentUser();
+        Task task = findTask(id, current.getId());
+
         boolean administrator = current.getRole() == UserRole.ADMIN;
         boolean creator = task.getCreatedBy().getId().equals(current.getId());
 
@@ -174,9 +175,18 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
+    /** Atividade de outro usuário responde 404, para não revelar que ela existe. */
     private Task findTask(Long id) {
-        return taskRepository.findById(id)
+        return findTask(id, currentUserService.requireCurrentUser().getId());
+    }
+
+    private Task findTask(Long id, Long viewerId) {
+        return taskRepository.findVisibleById(id, viewerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Atividade não encontrada."));
+    }
+
+    private Specification<Task> visible(Specification<Task> specification) {
+        return TaskSpecifications.visibleTo(currentUserService.requireCurrentUser().getId()).and(specification);
     }
 
     private void validateRange(LocalDate startDate, LocalDate endDate) {
