@@ -60,6 +60,17 @@ public class UserService {
         return toResponse(user);
     }
 
+    /** O próprio usuário troca e-mail e, opcionalmente, a senha. */
+    @Transactional
+    public User updateOwnAccount(Long id, String newEmail, String newPassword) {
+        User user = findById(id);
+        String email = User.normalizeEmail(newEmail);
+        ensureEmailAvailable(email, id);
+        String password = newPassword == null || newPassword.isBlank() ? null : passwordEncoder.encode(newPassword);
+        user.update(user.getName(), email, user.getRole(), password);
+        return user;
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public UserResponse changeActivation(Long id, boolean active) {

@@ -69,7 +69,7 @@ src/main/java/com/escritorio/agenda_juridica
 
 | Recurso | Rotas |
 | --- | --- |
-| Autenticação | `GET /api/auth/csrf` · `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me` |
+| Autenticação | `GET /api/auth/csrf` · `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me` · `PUT /api/auth/account` (troca o próprio e-mail e senha) |
 | Atividades | `GET /api/tasks` (filtros e paginação) · `GET /api/tasks/day` · `GET /api/tasks/week` · `GET /api/tasks/alerts/{alerta}` |
 | | `POST /api/tasks` · `PUT /api/tasks/{id}` · `PATCH /api/tasks/{id}/status` · `POST /api/tasks/{id}/complete` · `/reopen` · `/cancel` · `DELETE /api/tasks/{id}` |
 | Equipe (admin) | `GET/POST /api/users` · `GET/PUT /api/users/{id}` · `PATCH /api/users/{id}/activation` |
@@ -132,6 +132,7 @@ export SESSION_COOKIE_SECURE=true
 | Variável | Descrição |
 | --- | --- |
 | `APP_ADMIN_NAME`, `APP_ADMIN_EMAIL`, `APP_ADMIN_PASSWORD` | Criam (ou redefinem) o administrador na subida. **Sem elas, nenhum administrador é criado.** |
+| `app.admins[n].name`, `.email`, `.password` | Lista de administradores iniciais (ex.: em `application-local.properties`, fora do git). Só são criados com o banco vazio, para não desfazer trocas de e-mail e senha feitas pela tela. |
 | `APP_DASHBOARD_UPCOMING_DAYS` | Janela de "próximo do vencimento", padrão 3 dias |
 | `SESSION_COOKIE_SECURE` | `true` atrás de HTTPS |
 

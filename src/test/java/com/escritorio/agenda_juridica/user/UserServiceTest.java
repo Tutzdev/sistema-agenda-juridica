@@ -1,5 +1,6 @@
 package com.escritorio.agenda_juridica.user;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -44,5 +45,38 @@ class UserServiceTest {
         when(userRepository.countByRoleAndActiveTrue(UserRole.ADMIN)).thenReturn(1L);
 
         assertThrows(BusinessRuleException.class, () -> userService.changeActivation(1L, false));
+    }
+
+    @Test
+    void updatesOwnEmailAndKeepsPasswordWhenBlank() {
+        User user = new User("Hilton", "hilton@gmail.com", "hash-antigo", UserRole.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        userService.updateOwnAccount(1L, " Novo@Gmail.com ", "");
+
+        assertEquals("novo@gmail.com", user.getEmail());
+        assertEquals("hash-antigo", user.getPasswordHash());
+        assertEquals(UserRole.ADMIN, user.getRole());
+    }
+
+    @Test
+    void updatesOwnPassword() {
+        User user = new User("Hilton", "hilton@gmail.com", "hash-antigo", UserRole.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("nova-senha")).thenReturn("hash-novo");
+
+        userService.updateOwnAccount(1L, "hilton@gmail.com", "nova-senha");
+
+        assertEquals("hash-novo", user.getPasswordHash());
+    }
+
+    @Test
+    void rejectsOwnEmailAlreadyInUse() {
+        User user = new User("Hilton", "hilton@gmail.com", "hash", UserRole.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmailIgnoreCaseAndIdNot("vasconcelos@gmail.com", 1L)).thenReturn(true);
+
+        assertThrows(ConflictException.class,
+                () -> userService.updateOwnAccount(1L, "vasconcelos@gmail.com", null));
     }
 }

@@ -2,6 +2,7 @@ package com.escritorio.agenda_juridica.auth;
 
 import com.escritorio.agenda_juridica.auth.dto.AuthenticatedUserResponse;
 import com.escritorio.agenda_juridica.auth.dto.LoginRequest;
+import com.escritorio.agenda_juridica.auth.dto.UpdateAccountRequest;
 import com.escritorio.agenda_juridica.security.AuthenticatedUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +14,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -42,6 +44,13 @@ public class AuthController {
     @GetMapping("/me")
     public AuthenticatedUserResponse me(@AuthenticationPrincipal AuthenticatedUser user) {
         return authService.me(user);
+    }
+
+    @PutMapping("/account")
+    public AuthenticatedUserResponse updateAccount(@AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody UpdateAccountRequest request,
+            HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        return authService.updateAccount(user, request, httpRequest, httpResponse);
     }
 
     @PostMapping("/logout")
