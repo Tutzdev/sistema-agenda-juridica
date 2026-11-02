@@ -266,7 +266,7 @@ function taskActions(task) {
   ].join('');
 }
 
-/* Todo card de atividade abre a edição ao ser clicado (ou com Enter). */
+/* Cards da semana na Agenda abrem a edição ao serem clicados (ou com Enter). */
 function editableCard(task) {
   return `data-edit-task="${task.id}" tabindex="0" title="Clique para editar" aria-label="Editar: ${escapeHtml(task.title)}"`;
 }
@@ -275,7 +275,7 @@ function taskRow(task, { withActions = false } = {}) {
   state.tasksById.set(task.id, task);
   const priority = PRIORITY[task.priority];
   const status = STATUS[task.status];
-  return `<article class="task-row is-clickable ${priority?.rowClass || ''}" ${editableCard(task)}>
+  return `<article class="task-row ${priority?.rowClass || ''}">
     ${dateBlock(task)}
     <div class="task-main">
       <h3 class="task-title">${escapeHtml(task.title)}</h3>

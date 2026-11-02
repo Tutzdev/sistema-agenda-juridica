@@ -494,7 +494,6 @@ a.stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 /* Cards de atividade clicáveis (abrem a edição) */
 .is-clickable { cursor: pointer; }
 .is-clickable:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.task-row.is-clickable:hover .task-title { color: var(--focus); }
 .appointment.is-clickable { transition: transform 150ms ease, box-shadow 150ms ease; }
 @media (hover: hover) and (pointer: fine) {
   .appointment.is-clickable:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgb(23 32 49 / 0.12); }
