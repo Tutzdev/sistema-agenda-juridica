@@ -490,6 +490,15 @@ a.stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .appointment.is-urgent { box-shadow: 0 1px 2px rgb(23 32 49 / 0.06), inset 3px 0 0 var(--danger); }
 .appointment.is-high { box-shadow: 0 1px 2px rgb(23 32 49 / 0.06), inset 3px 0 0 var(--gold); }
 .appointment.is-done { opacity: 0.6; }
+
+/* Cards de atividade clicáveis (abrem a edição) */
+.is-clickable { cursor: pointer; }
+.is-clickable:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.task-row.is-clickable:hover .task-title { color: var(--focus); }
+.appointment.is-clickable { transition: transform 150ms ease, box-shadow 150ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .appointment.is-clickable:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgb(23 32 49 / 0.12); }
+}
 .appointment.is-done strong { text-decoration: line-through; }
 .appointment time { font-size: 0.75rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
 .appointment strong { font-weight: 700; line-height: 1.3; }

@@ -266,11 +266,16 @@ function taskActions(task) {
   ].join('');
 }
 
+/* Todo card de atividade abre a edição ao ser clicado (ou com Enter). */
+function editableCard(task) {
+  return `data-edit-task="${task.id}" tabindex="0" title="Clique para editar" aria-label="Editar: ${escapeHtml(task.title)}"`;
+}
+
 function taskRow(task, { withActions = false } = {}) {
   state.tasksById.set(task.id, task);
   const priority = PRIORITY[task.priority];
   const status = STATUS[task.status];
-  return `<article class="task-row ${priority?.rowClass || ''}">
+  return `<article class="task-row is-clickable ${priority?.rowClass || ''}" ${editableCard(task)}>
     ${dateBlock(task)}
     <div class="task-main">
       <h3 class="task-title">${escapeHtml(task.title)}</h3>
@@ -494,9 +499,10 @@ function renderAgendaWeek(data) {
 }
 
 function appointment(task, index) {
+  state.tasksById.set(task.id, task);
   const done = task.status === 'COMPLETED' || task.status === 'CANCELED';
   const time = timeOf(task);
-  return `<article class="appointment ${PRIORITY[task.priority]?.rowClass || ''} ${done ? 'is-done' : ''}" style="animation-delay:${index * 40}ms">
+  return `<article class="appointment is-clickable ${PRIORITY[task.priority]?.rowClass || ''} ${done ? 'is-done' : ''}" style="animation-delay:${index * 40}ms" ${editableCard(task)}>
     ${time ? `<time>${escapeHtml(time)}</time>` : ''}
     <strong>${escapeHtml(task.title)}</strong>
     <small>${escapeHtml(CATEGORY_LABELS[task.category] || 'Atividade')}</small>
@@ -902,6 +908,11 @@ function shiftWeek(target, step) {
   return target === 'agenda' ? loadAgendaWeek() : loadDashboard();
 }
 
+function openEditFromCard(card) {
+  const task = state.tasksById.get(Number(card.dataset.editTask));
+  if (task) openTaskDialog(task);
+}
+
 function bindEvents() {
   $('#login-form').addEventListener('submit', submitLogin);
   $('#logout-button').addEventListener('click', logout);
@@ -940,7 +951,15 @@ function bindEvents() {
 
   document.addEventListener('click', (event) => {
     const button = event.target.closest('[data-task-action]');
-    if (button) runTaskAction(button);
+    if (button) return runTaskAction(button);
+    const card = event.target.closest('[data-edit-task]');
+    if (card) openEditFromCard(card);
+  });
+  document.addEventListener('keydown', (event) => {
+    if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('[data-edit-task]')) {
+      event.preventDefault();
+      openEditFromCard(event.target);
+    }
   });
 }
 
