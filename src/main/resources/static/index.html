@@ -328,6 +328,14 @@
         <fieldset class="fieldset owner-field" id="responsible-field" hidden>
           <legend>De quem é a atividade</legend>
           <div id="task-responsible" class="owner-picker" role="radiogroup" aria-label="Responsável pela atividade"></div>
+          <label class="share-toggle" for="task-shared">
+            <input id="task-shared" type="checkbox" name="shared" role="switch">
+            <span class="share-switch" aria-hidden="true"></span>
+            <span class="share-text">
+              <strong>Compartilhar com o outro administrador</strong>
+              <small>Ligado: os dois veem a atividade na agenda. Desligado: só quem é o responsável e quem criou.</small>
+            </span>
+          </label>
         </fieldset>
         <div class="field-row">
           <div class="field">

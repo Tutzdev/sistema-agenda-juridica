@@ -19,5 +19,10 @@ public record UpdateTaskRequest(
         LocalDate dueDate,
         LocalTime dueTime,
         LocalDate reminderDate,
-        @NotNull Long responsibleUserId) {
+        @NotNull Long responsibleUserId,
+        Boolean shared) {
+
+    public UpdateTaskRequest {
+        shared = Boolean.TRUE.equals(shared);
+    }
 }

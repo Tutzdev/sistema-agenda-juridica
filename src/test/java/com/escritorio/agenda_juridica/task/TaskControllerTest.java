@@ -86,6 +86,6 @@ class TaskControllerTest {
     private TaskResponse response(Long id) {
         return new TaskResponse(id, "Preparar manifestação", null, TaskCategory.DEADLINE, TaskStatus.PENDING,
                 TaskPriority.HIGH, null, null, null, null, null, DeadlineAlertStatus.NONE,
-                null, null, null, null, null);
+                null, false, null, null, null, null);
     }
 }

@@ -63,6 +63,6 @@ class DeadlineClassifierTest {
 
     private Task task(LocalDate dueDate, LocalDate reminderDate) {
         return new Task("Prazo", null, TaskCategory.DEADLINE, TaskPriority.NORMAL, TODAY, null,
-                dueDate, null, reminderDate, user, user);
+                dueDate, null, reminderDate, user, false, user);
     }
 }

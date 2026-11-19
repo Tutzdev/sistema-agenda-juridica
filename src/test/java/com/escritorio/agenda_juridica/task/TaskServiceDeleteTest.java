@@ -74,7 +74,7 @@ class TaskServiceDeleteTest {
 
     private Task taskWithStatus(TaskStatus status) {
         Task task = new Task("Prazo", null, TaskCategory.DEADLINE, TaskPriority.NORMAL, null, null,
-                LocalDate.of(2026, 11, 5), null, null, admin, admin);
+                LocalDate.of(2026, 11, 5), null, null, admin, false, admin);
         if (status != TaskStatus.PENDING) {
             task.changeStatus(status, NOW);
         }

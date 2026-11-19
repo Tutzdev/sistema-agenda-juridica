@@ -57,7 +57,7 @@ class TaskServiceVisibilityTest {
     @Test
     void updateTaskOfAnotherUserReturnsNotFound() {
         UpdateTaskRequest request = new UpdateTaskRequest("Editada", null, TaskCategory.DEADLINE,
-                TaskPriority.NORMAL, LocalDate.of(2026, 11, 5), null, null, null, null, 1L);
+                TaskPriority.NORMAL, LocalDate.of(2026, 11, 5), null, null, null, null, 1L, false);
 
         assertThrows(ResourceNotFoundException.class, () -> taskService.update(TASK_OF_LEANDRO, request));
         verifyNoInteractions(userService);

@@ -251,6 +251,11 @@ function ownerPill(task) {
   return `<span class="pill pill--owner" title="Responsável: ${escapeHtml(name)}">${icon('users')}${escapeHtml(name)}</span>`;
 }
 
+function sharedPill(task) {
+  if (!task.shared) return '';
+  return `<span class="pill pill--gold" title="Os dois administradores veem esta atividade">${icon('eye')}Compartilhada</span>`;
+}
+
 function taskActions(task) {
   const button = (action, label, iconName, tone = '') =>
     `<button class="action ${tone}" type="button" data-task-id="${task.id}" data-task-action="${action}">${icon(iconName)}${label}</button>`;
@@ -290,6 +295,7 @@ function taskRow(task, { withActions = false } = {}) {
       ${priority ? ui.pill(priority.label, priority.tone) : ''}
       ${withActions && status ? ui.pill(status.label, status.tone) : ''}
       ${ownerPill(task)}
+      ${sharedPill(task)}
     </div>
     ${withActions ? `<div class="task-actions">${taskActions(task)}</div>` : ''}
   </article>`;
@@ -773,6 +779,7 @@ async function openTaskDialog(task = null) {
   if (task) {
     ['title', 'description', 'category', 'priority'].forEach((name) => { taskForm.elements[name].value = task[name] ?? ''; });
   }
+  taskForm.elements.shared.checked = Boolean(task?.shared);
   Object.keys(DATE_FIELDS).forEach((name) => setDateField(name, task?.[name]));
   TIME_FIELDS.forEach((name) => setTimeField(name, task?.[name]));
 
@@ -794,7 +801,8 @@ function taskPayload() {
     dueDate: readDateField('dueDate', DATE_FIELDS.dueDate),
     dueTime: readTimeField('dueTime'),
     reminderDate: readDateField('reminderDate', DATE_FIELDS.reminderDate),
-    responsibleUserId: Number(form.get('responsibleUserId')) || state.user.id
+    responsibleUserId: Number(form.get('responsibleUserId')) || state.user.id,
+    shared: taskForm.elements.shared.checked
   };
 }
 

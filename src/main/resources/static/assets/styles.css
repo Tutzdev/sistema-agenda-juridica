@@ -164,6 +164,25 @@ a { color: inherit; }
 .owner-option input:checked + span small { color: var(--gold); }
 .owner-option input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
 
+/* Compartilhar a atividade com o outro administrador */
+.share-toggle { position: relative; display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; }
+.share-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.share-switch {
+  position: relative; flex: none; width: 2.75rem; height: 1.5rem; margin-top: 0.125rem;
+  border-radius: 999px; background: var(--border-strong); transition: background 150ms ease;
+}
+.share-switch::after {
+  content: ""; position: absolute; top: 0.1875rem; left: 0.1875rem;
+  width: 1.125rem; height: 1.125rem; border-radius: 50%; background: white;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2); transition: transform 150ms var(--ease-out);
+}
+.share-toggle input:checked + .share-switch { background: var(--gold); }
+.share-toggle input:checked + .share-switch::after { transform: translateX(1.25rem); }
+.share-toggle input:focus-visible + .share-switch { outline: 2px solid var(--focus); outline-offset: 2px; }
+.share-text { display: grid; gap: 0.125rem; }
+.share-text strong { font-size: 0.875rem; }
+.share-text small { font-size: 0.8125rem; color: var(--muted); }
+
 .control {
   width: 100%; min-height: 2.75rem;
   border: 1px solid var(--border-strong); border-radius: var(--radius-sm);

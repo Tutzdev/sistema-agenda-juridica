@@ -12,6 +12,6 @@ import com.escritorio.agenda_juridica.task.TaskStatus;
 public record TaskResponse(Long id, String title, String description, TaskCategory category, TaskStatus status,
         TaskPriority priority, LocalDate scheduledDate, LocalTime scheduledTime, LocalDate dueDate,
         LocalTime dueTime, LocalDate reminderDate, DeadlineAlertStatus deadlineAlertStatus,
-        UserSummaryResponse responsibleUser, UserSummaryResponse createdBy, LocalDateTime completedAt,
+        UserSummaryResponse responsibleUser, boolean shared, UserSummaryResponse createdBy, LocalDateTime completedAt,
         LocalDateTime createdAt, LocalDateTime updatedAt) {
 }

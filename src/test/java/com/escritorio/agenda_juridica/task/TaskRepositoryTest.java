@@ -54,9 +54,9 @@ class TaskRepositoryTest {
     @Test
     void dashboardQueryLoadsWeeklyAndUpcomingTasks() {
         taskRepository.save(new Task("Reunião", null, TaskCategory.CLIENT_MEETING, TaskPriority.NORMAL,
-                REFERENCE, null, null, null, null, hilton, hilton));
+                REFERENCE, null, null, null, null, hilton, false, hilton));
         taskRepository.save(new Task("Prazo", null, TaskCategory.DEADLINE, TaskPriority.HIGH,
-                null, null, REFERENCE.plusDays(2), null, REFERENCE, hilton, hilton));
+                null, null, REFERENCE.plusDays(2), null, REFERENCE, hilton, false, hilton));
 
         List<Task> tasks = dashboardTasksOf(hilton);
 
@@ -89,9 +89,32 @@ class TaskRepositoryTest {
         assertEquals(1, dashboardTasksOf(leandro).size());
     }
 
+    @Test
+    void sharedTaskIsVisibleToEveryAdmin() {
+        Task shared = taskRepository.save(scheduledTask("Audiência compartilhada", hilton, true, hilton));
+
+        assertEquals(List.of("Audiência compartilhada"), titlesInListing(leandro));
+        assertTrue(taskRepository.findVisibleById(shared.getId(), leandro.getId()).isPresent());
+        assertEquals(1, dashboardTasksOf(leandro).size());
+        assertEquals(1, taskRepository.countForDashboard(TaskStatus.PENDING, leandro.getId(), null));
+    }
+
+    @Test
+    void privateTaskStaysHiddenFromTheOtherAdmin() {
+        Task own = taskRepository.save(scheduledTask("Prazo particular", hilton, false, hilton));
+
+        assertTrue(titlesInListing(leandro).isEmpty());
+        assertTrue(taskRepository.findVisibleById(own.getId(), leandro.getId()).isEmpty());
+        assertEquals(0, taskRepository.countForDashboard(TaskStatus.PENDING, leandro.getId(), null));
+    }
+
     private Task scheduledTask(String title, User responsible, User creator) {
+        return scheduledTask(title, responsible, false, creator);
+    }
+
+    private Task scheduledTask(String title, User responsible, boolean shared, User creator) {
         return new Task(title, null, TaskCategory.DEADLINE, TaskPriority.NORMAL,
-                REFERENCE, null, null, null, null, responsible, creator);
+                REFERENCE, null, null, null, null, responsible, shared, creator);
     }
 
     private List<String> titlesInListing(User viewer) {

@@ -40,6 +40,7 @@ public class TaskMapper {
             new UserSummaryResponse(
                 task.getResponsibleUser().getId(), 
                 task.getResponsibleUser().getName()),
+            task.isShared(),
             new UserSummaryResponse(
                 task.getCreatedBy().getId(), 
                 task.getCreatedBy().getName()),

@@ -34,11 +34,11 @@ class TaskTest {
     void rejectsReminderAfterDueDate() {
         assertThrows(BusinessRuleException.class, () -> new Task("Prazo", null, TaskCategory.DEADLINE,
                 TaskPriority.NORMAL, null, null, LocalDate.of(2026, 8, 18), null,
-                LocalDate.of(2026, 8, 19), user, user));
+                LocalDate.of(2026, 8, 19), user, false, user));
     }
 
     private Task validTask() {
         return new Task("Prazo", null, TaskCategory.DEADLINE, TaskPriority.NORMAL, null, null,
-                LocalDate.of(2026, 8, 18), null, LocalDate.of(2026, 8, 17), user, user);
+                LocalDate.of(2026, 8, 18), null, LocalDate.of(2026, 8, 17), user, false, user);
     }
 }

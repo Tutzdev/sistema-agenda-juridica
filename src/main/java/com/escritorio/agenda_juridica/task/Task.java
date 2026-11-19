@@ -23,6 +23,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "tasks")
@@ -71,6 +72,10 @@ public class Task {
     @JoinColumn(name = "responsible_user_id", nullable = false)
     private User responsibleUser;
 
+    @Column(nullable = false)
+    @ColumnDefault("false")
+    private boolean shared;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by", nullable = false, updatable = false)
     private User createdBy;
@@ -89,9 +94,9 @@ public class Task {
 
     public Task(String title, String description, TaskCategory category, TaskPriority priority,
             LocalDate scheduledDate, LocalTime scheduledTime, LocalDate dueDate, LocalTime dueTime,
-            LocalDate reminderDate, User responsibleUser, User createdBy) {
+            LocalDate reminderDate, User responsibleUser, boolean shared, User createdBy) {
         updateDetails(title, description, category, priority, scheduledDate, scheduledTime, dueDate, dueTime,
-                reminderDate, responsibleUser);
+                reminderDate, responsibleUser, shared);
         this.createdBy = createdBy;
         this.status = TaskStatus.PENDING;
     }
@@ -110,7 +115,7 @@ public class Task {
 
     public void updateDetails(String title, String description, TaskCategory category, TaskPriority priority,
             LocalDate scheduledDate, LocalTime scheduledTime, LocalDate dueDate, LocalTime dueTime,
-            LocalDate reminderDate, User responsibleUser) {
+            LocalDate reminderDate, User responsibleUser, boolean shared) {
 
         validateDates(scheduledDate, scheduledTime, dueDate, dueTime, reminderDate);
 
@@ -124,6 +129,7 @@ public class Task {
         this.dueTime         =  dueTime;
         this.reminderDate    =  reminderDate;
         this.responsibleUser =  responsibleUser;
+        this.shared          =  shared;
     }
 
     public void changeStatus(TaskStatus newStatus, LocalDateTime now) {
@@ -178,6 +184,7 @@ public class Task {
     public LocalDate getReminderDate()      { return reminderDate; }
     public TaskPriority getPriority()       { return priority; }
     public User getResponsibleUser()        { return responsibleUser; }
+    public boolean isShared()               { return shared; }
     public User getCreatedBy()              { return createdBy; }
     public LocalDateTime getCompletedAt()   { return completedAt; }
     public LocalDateTime getCreatedAt()     { return createdAt; }

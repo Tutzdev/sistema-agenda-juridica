@@ -15,7 +15,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 /**
  * Visibilidade: todo usuário, inclusive ADMIN, só enxerga atividades em que é
- * o responsável ou o criador. As consultas de leitura recebem o {@code viewerId}.
+ * o responsável ou o criador, mais as marcadas como compartilhadas.
+ * As consultas de leitura recebem o {@code viewerId}.
  */
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
 
@@ -27,7 +28,7 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @Query("""
             select t from Task t
             where t.id = :id
-              and (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId)
+              and (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId or t.shared = true)
             """)
     Optional<Task> findVisibleById(@Param("id") Long id, @Param("viewerId") Long viewerId);
 
@@ -38,7 +39,7 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @Query("""
             select count(t) from Task t
             where t.status = :status
-              and (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId)
+              and (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId or t.shared = true)
               and (:responsibleUserId is null or t.responsibleUser.id = :responsibleUserId)
             """)
     long countForDashboard(@Param("status") TaskStatus status,
@@ -48,7 +49,7 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @EntityGraph(attributePaths = {"responsibleUser", "createdBy"})
     @Query("""
             select distinct t from Task t
-            where (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId)
+            where (t.responsibleUser.id = :viewerId or t.createdBy.id = :viewerId or t.shared = true)
               and (:responsibleUserId is null or t.responsibleUser.id = :responsibleUserId)
               and (
                     t.scheduledDate between :weekStart and :weekEnd

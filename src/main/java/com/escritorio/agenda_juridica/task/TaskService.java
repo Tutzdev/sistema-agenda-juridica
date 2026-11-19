@@ -123,6 +123,7 @@ public class TaskService {
             request.dueTime(),
             request.reminderDate(), 
             responsible, 
+            request.shared(),
             creator
         );
 
@@ -144,7 +145,8 @@ public class TaskService {
             request.dueDate(), 
             request.dueTime(),
             request.reminderDate(), 
-            responsible);
+            responsible,
+            request.shared());
 
         return taskMapper.toResponse(task);
     }
@@ -175,7 +177,7 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
-    /** Atividade de outro usuário responde 404, para não revelar que ela existe. */
+    /** Atividade de outro usuário (e não compartilhada) responde 404, para não revelar que ela existe. */
     private Task findTask(Long id) {
         return findTask(id, currentUserService.requireCurrentUser().getId());
     }
