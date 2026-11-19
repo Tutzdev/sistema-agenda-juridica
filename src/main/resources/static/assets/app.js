@@ -243,8 +243,12 @@ function taskMeta(task) {
   return `<div class="task-meta">
     <span>${escapeHtml(CATEGORY_LABELS[task.category] || 'Atividade')}</span>
     ${time ? `<span>${icon('clock')}${escapeHtml(time)}</span>` : ''}
-    <span>${icon('users')}${escapeHtml(task.responsibleUser?.name || 'Sem responsável')}</span>
   </div>`;
+}
+
+function ownerPill(task) {
+  const name = task.responsibleUser?.name || 'Sem responsável';
+  return `<span class="pill pill--owner" title="Responsável: ${escapeHtml(name)}">${icon('users')}${escapeHtml(name)}</span>`;
 }
 
 function taskActions(task) {
@@ -285,6 +289,7 @@ function taskRow(task, { withActions = false } = {}) {
       ${deadlinePill(task)}
       ${priority ? ui.pill(priority.label, priority.tone) : ''}
       ${withActions && status ? ui.pill(status.label, status.tone) : ''}
+      ${ownerPill(task)}
     </div>
     ${withActions ? `<div class="task-actions">${taskActions(task)}</div>` : ''}
   </article>`;
@@ -506,6 +511,7 @@ function appointment(task, index) {
     ${time ? `<time>${escapeHtml(time)}</time>` : ''}
     <strong>${escapeHtml(task.title)}</strong>
     <small>${escapeHtml(CATEGORY_LABELS[task.category] || 'Atividade')}</small>
+    <small class="appointment-owner">${icon('users')}${escapeHtml(task.responsibleUser?.name || 'Sem responsável')}</small>
   </article>`;
 }
 
@@ -724,19 +730,37 @@ function fillCategoryOptions() {
   $$('[data-category-options]').forEach((select) => select.insertAdjacentHTML('beforeend', options));
 }
 
+/* Botões "de quem é a atividade": um por administrador ativo (ou o responsável atual). */
 async function fillResponsibleOptions(selectedId) {
   const field = $('#responsible-field');
   field.hidden = !isAdmin();
   if (!isAdmin()) return;
 
-  const select = $('#task-responsible');
+  const picker = $('#task-responsible');
   try {
-    const members = (await teamMembers()).filter((member) => member.active || member.id === selectedId);
-    select.innerHTML = members.map((member) => `<option value="${member.id}">${escapeHtml(member.name)}</option>`).join('');
-    select.value = String(selectedId ?? state.user.id);
+    const owners = responsibleCandidates(await teamMembers(), selectedId);
+    const checkedId = owners.some((member) => member.id === selectedId) ? selectedId : state.user.id;
+    picker.innerHTML = owners.map((member) => ownerOption(member, owners, checkedId)).join('');
   } catch {
     field.hidden = true;
   }
+}
+
+function responsibleCandidates(members, selectedId) {
+  const available = members.filter((member) => member.active || member.id === selectedId);
+  const admins = available.filter((member) => member.role === 'ADMIN' || member.id === selectedId);
+
+  return admins.length ? admins : available;
+}
+
+function ownerOption(member, owners, checkedId) {
+  const sameName = owners.filter((other) => other.name === member.name).length > 1;
+  const detail = sameName && member.email ? member.email.split('@')[0] : '';
+
+  return `<label class="owner-option">
+    <input type="radio" name="responsibleUserId" value="${member.id}" ${member.id === checkedId ? 'checked' : ''}>
+    <span>${icon('users')}${escapeHtml(member.name)}${detail ? `<small>${escapeHtml(detail)}</small>` : ''}</span>
+  </label>`;
 }
 
 async function openTaskDialog(task = null) {

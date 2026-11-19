@@ -325,6 +325,10 @@
           <label for="task-title">Título</label>
           <input id="task-title" class="control" name="title" required maxlength="160" placeholder="Ex.: Contestação no processo 0801234-55.2026">
         </div>
+        <fieldset class="fieldset owner-field" id="responsible-field" hidden>
+          <legend>De quem é a atividade</legend>
+          <div id="task-responsible" class="owner-picker" role="radiogroup" aria-label="Responsável pela atividade"></div>
+        </fieldset>
         <div class="field-row">
           <div class="field">
             <label for="task-category">Categoria</label>
@@ -359,11 +363,6 @@
           </div>
           <p class="hint">Mês e ano já vêm no atual: escolha o dia. Sem dia, o campo fica em branco. Horário em 24h (ex.: 09:00, 19:00).</p>
         </fieldset>
-
-        <div class="field" id="responsible-field" hidden>
-          <label for="task-responsible">Responsável</label>
-          <select id="task-responsible" class="control" name="responsibleUserId"></select>
-        </div>
 
         <div class="field">
           <label for="task-description">Observações <span class="optional">(opcional)</span></label>
