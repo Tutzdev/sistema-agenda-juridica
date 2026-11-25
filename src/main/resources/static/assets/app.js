@@ -129,7 +129,6 @@ const api = {
   tasks: (params) => api.request(`/api/tasks?${new URLSearchParams({ size: '100', ...params })}`),
   createTask: (payload) => api.request('/api/tasks', { method: 'POST', body: payload }),
   updateTask: (id, payload) => api.request(`/api/tasks/${id}`, { method: 'PUT', body: payload }),
-  startTask: (id) => api.request(`/api/tasks/${id}/status`, { method: 'PATCH', body: { status: 'IN_PROGRESS' } }),
   completeTask: (id) => api.request(`/api/tasks/${id}/complete`, { method: 'POST' }),
   reopenTask: (id) => api.request(`/api/tasks/${id}/reopen`, { method: 'POST' }),
   cancelTask: (id) => api.request(`/api/tasks/${id}/cancel`, { method: 'POST' }),
@@ -148,7 +147,8 @@ const state = {
   agendaDate: new Date(),
   tasksById: new Map(),
   team: null,
-  editingTaskId: null
+  editingTaskId: null,
+  editingTask: null
 };
 
 const isAdmin = () => state.user?.role === 'ADMIN';
@@ -253,12 +253,12 @@ function ownerPill(task) {
 
 function sharedPill(task) {
   if (!task.shared) return '';
-  return `<span class="pill pill--gold" title="Os dois administradores veem esta atividade">${icon('eye')}Compartilhada</span>`;
+  return `<span class="pill pill--gold pill--icon" title="Compartilhada: os dois administradores veem esta atividade" aria-label="Compartilhada">${icon('eye')}</span>`;
 }
 
 function taskActions(task) {
   const button = (action, label, iconName, tone = '') =>
-    `<button class="action ${tone}" type="button" data-task-id="${task.id}" data-task-action="${action}">${icon(iconName)}${label}</button>`;
+    `<button class="action action--icon ${tone}" type="button" data-task-id="${task.id}" data-task-action="${action}" title="${label}" aria-label="${label}">${icon(iconName)}</button>`;
 
   if (task.status === 'CANCELED') {
     return button('reopen', 'Reabrir', 'reopen') + button('remove', 'Remover', 'trash', 'action--danger');
@@ -269,7 +269,6 @@ function taskActions(task) {
 
   return [
     button('edit', 'Editar', 'pencil'),
-    task.status === 'PENDING' ? button('start', 'Iniciar', 'play') : '',
     button('complete', 'Concluir', 'check', 'action--success'),
     button('cancel', 'Cancelar', 'ban', 'action--danger')
   ].join('');
@@ -610,7 +609,6 @@ async function loadTeam() {
    ================================================================ */
 
 const TASK_ACTIONS = {
-  start: { run: api.startTask, done: 'Atividade iniciada.' },
   complete: { run: api.completeTask, done: 'Atividade concluída.' },
   reopen: { run: api.reopenTask, done: 'Atividade reaberta.' },
   cancel: { run: api.cancelTask, done: 'Atividade cancelada.' },
@@ -727,8 +725,15 @@ function readTimeField(name) {
   return hour ? `${hour}:${taskForm.elements[`${name}Minute`].value}` : null;
 }
 
-const DATE_FIELDS = { scheduledDate: 'Data', dueDate: 'Vence em', reminderDate: 'Lembrar em' };
-const TIME_FIELDS = ['scheduledTime', 'dueTime'];
+const DATE_FIELDS = { scheduledDate: 'Data' };
+const TIME_FIELDS = ['scheduledTime'];
+const dateToBeDefined = () => taskForm.elements.dateToBeDefined;
+
+/* "Data a definir" desliga os seletores de data e horário da atividade. */
+function syncDateToBeDefined() {
+  const disabled = dateToBeDefined().checked;
+  $$('.date-input .control, .time-input .control', taskForm).forEach((select) => { select.disabled = disabled; });
+}
 
 function fillCategoryOptions() {
   const options = Object.entries(CATEGORY_LABELS)
@@ -771,6 +776,7 @@ function ownerOption(member, owners, checkedId) {
 
 async function openTaskDialog(task = null) {
   state.editingTaskId = task?.id ?? null;
+  state.editingTask = task;
   taskForm.reset();
   $('#task-error').textContent = '';
   $('#task-dialog-title').textContent = task ? 'Editar atividade' : 'Nova atividade';
@@ -782,10 +788,37 @@ async function openTaskDialog(task = null) {
   taskForm.elements.shared.checked = Boolean(task?.shared);
   Object.keys(DATE_FIELDS).forEach((name) => setDateField(name, task?.[name]));
   TIME_FIELDS.forEach((name) => setTimeField(name, task?.[name]));
+  dateToBeDefined().checked = Boolean(task) && !task.scheduledDate;
+  syncDateToBeDefined();
 
   await fillResponsibleOptions(task?.responsibleUser?.id);
   taskDialog.showModal();
   $('#task-title').focus();
+}
+
+function readSchedule() {
+  if (dateToBeDefined().checked) {
+    return { scheduledDate: null, scheduledTime: null };
+  }
+
+  const scheduledDate = readDateField('scheduledDate', DATE_FIELDS.scheduledDate);
+
+  if (!scheduledDate) {
+    throw new Error('Escolha o dia da atividade ou marque "Data a definir".');
+  }
+
+  return { scheduledDate, scheduledTime: readTimeField('scheduledTime') };
+}
+
+/* O prazo saiu do formulário: atividades antigas mantêm o que já tinham. */
+function keptDeadline() {
+  const task = state.editingTask;
+
+  return {
+    dueDate: task?.dueDate ?? null,
+    dueTime: task?.dueTime ?? null,
+    reminderDate: task?.reminderDate ?? null
+  };
 }
 
 function taskPayload() {
@@ -796,11 +829,8 @@ function taskPayload() {
     description: optional('description'),
     category: form.get('category'),
     priority: form.get('priority'),
-    scheduledDate: readDateField('scheduledDate', DATE_FIELDS.scheduledDate),
-    scheduledTime: readTimeField('scheduledTime'),
-    dueDate: readDateField('dueDate', DATE_FIELDS.dueDate),
-    dueTime: readTimeField('dueTime'),
-    reminderDate: readDateField('reminderDate', DATE_FIELDS.reminderDate),
+    ...readSchedule(),
+    ...keptDeadline(),
     responsibleUserId: Number(form.get('responsibleUserId')) || state.user.id,
     shared: taskForm.elements.shared.checked
   };
@@ -972,6 +1002,7 @@ function bindEvents() {
 
   $$('[data-open-task]').forEach((button) => button.addEventListener('click', () => openTaskDialog()));
   taskForm.addEventListener('submit', submitTask);
+  dateToBeDefined().addEventListener('change', syncDateToBeDefined);
   $$('[data-close-dialog]').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
 
   $$('[data-open-account]').forEach((button) => button.addEventListener('click', openAccountDialog));

@@ -215,6 +215,22 @@ select.control { cursor: pointer; }
 .date-input { display: grid; gap: 0.375rem; grid-template-columns: 4.75rem minmax(0, 1fr) 5.25rem; }
 .time-input { display: grid; gap: 0.25rem; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; }
 .date-input .control, .time-input .control { padding-inline: 0.5rem; }
+
+/* "Data a definir": desliga a data e o horário da atividade */
+.date-tbd { position: relative; justify-self: start; cursor: pointer; }
+.date-tbd input { position: absolute; opacity: 0; pointer-events: none; }
+.date-tbd span {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  min-height: 2.5rem; padding: 0 0.875rem;
+  border: 1px solid var(--border-strong); border-radius: 999px; background: white;
+  font-size: 0.875rem; font-weight: 700;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.date-tbd .icon { width: 1rem; height: 1rem; }
+.date-tbd:hover span { border-color: var(--gold); background: var(--gold-soft); }
+.date-tbd input:checked + span { border-color: var(--sidebar); background: var(--sidebar); color: #f3e3bc; }
+.date-tbd input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+.field-row--date:has(.control:disabled) { opacity: 0.5; }
 .time-sep { font-weight: 700; color: var(--muted); }
 
 .form-error { min-height: 1.25rem; font-size: 0.875rem; font-weight: 600; color: var(--danger); }
@@ -398,6 +414,8 @@ select.control { cursor: pointer; }
 .pill--success { background: var(--success-soft); color: var(--success); }
 .pill--info { background: var(--gold-soft); color: var(--gold-dark); }
 .pill--gold { background: var(--gold-soft); color: var(--gold-dark); }
+.pill--icon { justify-content: center; width: 1.75rem; min-height: 1.75rem; padding: 0; }
+.pill--icon .icon { width: 1rem; height: 1rem; }
 
 /* ---------- Indicadores ---------- */
 
@@ -469,6 +487,8 @@ a.stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 .action .icon { width: 0.875rem; height: 0.875rem; }
+.action--icon { justify-content: center; width: 2.25rem; min-height: 2.25rem; padding: 0; }
+.action--icon .icon { width: 1rem; height: 1rem; }
 .action:hover:not(:disabled) { border-color: rgb(140 107 31 / 0.35); background: var(--gold-soft); color: var(--gold-dark); }
 .action:active:not(:disabled) { transform: scale(0.97); }
 .action:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
