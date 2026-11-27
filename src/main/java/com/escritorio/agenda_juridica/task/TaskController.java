@@ -63,6 +63,11 @@ public class TaskController {
         return taskService.listWeek(referenceDate, pageable);
     }
 
+    @GetMapping("/undated")
+    public Page<TaskResponse> undated(@PageableDefault(size = 20) Pageable pageable) {
+        return taskService.listUndated(pageable);
+    }
+
     @GetMapping("/alerts/{alert}")
     public Page<TaskResponse> alerts(@PathVariable DeadlineAlertStatus alert,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate referenceDate,

@@ -565,6 +565,14 @@ a.stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .appointment-owner .icon { width: 0.75rem; height: 0.75rem; color: var(--gold-dark); }
 .day-empty { margin: auto 0; font-size: 0.8125rem; text-align: center; color: #a3a097; }
 
+/* ---------- Datas a definir (agenda) ---------- */
+
+.undated-board {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 0.75rem;
+  padding: 1rem; align-items: start;
+}
+.undated-board .day-empty { grid-column: 1 / -1; margin: 0.75rem 0; }
+
 /* ---------- Filtros ---------- */
 
 .filters { display: grid; gap: 0.75rem; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) auto; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }

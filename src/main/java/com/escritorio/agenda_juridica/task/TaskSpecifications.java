@@ -32,6 +32,12 @@ public final class TaskSpecifications {
         return Specification.allOf(scheduledOnOrAfter(start), scheduledOnOrBefore(end));
     }
 
+    public static Specification<Task> withoutSchedule() {
+        return (root, query, builder) -> builder.and(
+                builder.isNull(root.get("scheduledDate")),
+                root.get("status").in(TaskStatus.PENDING, TaskStatus.IN_PROGRESS));
+    }
+
     public static Specification<Task> withAlert(DeadlineAlertStatus alert, LocalDate referenceDate, int upcomingDays) {
         return (root, query, builder) -> {
             var active = root.get("status").in(TaskStatus.PENDING, TaskStatus.IN_PROGRESS);

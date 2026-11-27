@@ -126,6 +126,7 @@ const api = {
   updateAccount: (payload) => api.request('/api/auth/account', { method: 'PUT', body: payload }),
   logout: () => api.request('/api/auth/logout', { method: 'POST' }),
   dashboard: (referenceDate) => api.request(`/api/dashboard?referenceDate=${toIsoDate(referenceDate)}`),
+  undatedTasks: () => api.request('/api/tasks/undated?size=100'),
   tasks: (params) => api.request(`/api/tasks?${new URLSearchParams({ size: '100', ...params })}`),
   createTask: (payload) => api.request('/api/tasks', { method: 'POST', body: payload }),
   updateTask: (id, payload) => api.request(`/api/tasks/${id}`, { method: 'PUT', body: payload }),
@@ -474,7 +475,7 @@ function renderWeekOverview(data) {
    ================================================================ */
 
 async function loadAgenda() {
-  await Promise.all([loadAgendaWeek(), loadAgendaList()]);
+  await Promise.all([loadAgendaWeek(), loadAgendaUndated(), loadAgendaList()]);
 }
 
 async function loadAgendaWeek() {
@@ -518,6 +519,29 @@ function appointment(task, index) {
     <small>${escapeHtml(CATEGORY_LABELS[task.category] || 'Atividade')}</small>
     <small class="appointment-owner">${icon('users')}${escapeHtml(task.responsibleUser?.name || 'Sem responsável')}</small>
   </article>`;
+}
+
+/* Atividades marcadas como "Data a definir" (sem dia), abaixo da semana. */
+async function loadAgendaUndated() {
+  const board = $('#agenda-undated');
+  board.innerHTML = ui.skeleton(1);
+  try {
+    const page = await api.undatedTasks();
+    renderAgendaUndated(page.content);
+  } catch (error) {
+    board.innerHTML = '';
+    handleError(error, board, loadAgendaUndated);
+  }
+}
+
+function renderAgendaUndated(tasks) {
+  $('#agenda-undated-label').textContent = tasks.length
+    ? `${plural(tasks.length, 'atividade', 'atividades')} aguardando data`
+    : 'Nenhuma atividade aguardando data.';
+
+  $('#agenda-undated').innerHTML = tasks.length
+    ? tasks.map((task, index) => appointment(task, index)).join('')
+    : '<p class="day-empty">Tudo com data marcada</p>';
 }
 
 async function loadAgendaList() {

@@ -95,6 +95,13 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
+    public Page<TaskResponse> listUndated(Pageable pageable) {
+        return taskRepository.findAll(visible(TaskSpecifications.withoutSchedule()),
+                        safePageable(pageable, Sort.by(Sort.Order.desc("createdAt"))))
+                .map(taskMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
     public Page<TaskResponse> listAlert(DeadlineAlertStatus alert, LocalDate referenceDate, Pageable pageable) {
 
         LocalDate date = referenceDate == null ? LocalDate.now(clock) : referenceDate;

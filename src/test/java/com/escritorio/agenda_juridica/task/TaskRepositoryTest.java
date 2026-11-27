@@ -108,6 +108,29 @@ class TaskRepositoryTest {
         assertEquals(0, taskRepository.countForDashboard(TaskStatus.PENDING, leandro.getId(), null));
     }
 
+    @Test
+    void undatedListingKeepsOnlyActiveTasksWithoutDate() {
+        taskRepository.save(undatedTask("Ligar para o cliente", hilton));
+        taskRepository.save(scheduledTask("Audiência marcada", hilton, hilton));
+
+        Task finished = undatedTask("Já resolvida", hilton);
+        finished.changeStatus(TaskStatus.COMPLETED, LocalDate.of(2026, 8, 18).atStartOfDay());
+        taskRepository.save(finished);
+
+        taskRepository.save(undatedTask("Particular do Leandro", leandro));
+
+        List<String> titles = taskRepository.findAll(
+                TaskSpecifications.visibleTo(hilton.getId()).and(TaskSpecifications.withoutSchedule()),
+                Pageable.unpaged()).map(Task::getTitle).getContent();
+
+        assertEquals(List.of("Ligar para o cliente"), titles);
+    }
+
+    private Task undatedTask(String title, User owner) {
+        return new Task(title, null, TaskCategory.OTHER, TaskPriority.NORMAL,
+                null, null, null, null, null, owner, false, owner);
+    }
+
     private Task scheduledTask(String title, User responsible, User creator) {
         return scheduledTask(title, responsible, false, creator);
     }
